@@ -1,34 +1,51 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput} from "react-native";
-import ListScreen from "@/components/screens/ListScreen";
-import {createDrawerNavigator} from '@react-navigation/drawer';
+import ListScreen from "@/components/screens/ListScreen"
 import ArrowRight from "@/components/buttons/arrowRight";
 import ArrowLeft from "@/components/buttons/arrowLeft";
 import PlusIcon from "@/components/buttons/plusIcon";
 
+interface Task {
+    id: string;
+    name: string;
+}
+
+
+
+interface List {
+    title: string;
+    id: number;
+}
+
 
 export default function Index() {
-
-    const [listContainer, setListContainer] = useState<React.JSX.Element[]>([]);
-    const [listCounter, setListCounter] = useState<number>(0);
+    const initList: List = { id: 0, title: "TaskDump"};
+    const [listCounter, setListCounter] = useState<number>(1);
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
+    const [listContainer, setListContainer] = useState<List[]>([initList]);
+    const [listDisplay, setListDisplay] = useState<List>(initList);
+
+    // Add a new list to the listContainer and increment the listCounter
     const addList = () => {
-        const newList: React.JSX.Element = (
-            <ListScreen key={listCounter} title={`List ${listCounter + 1}`}/>
-        )
+        const newList: List = { id: listCounter, title: "New List",  };
         setListCounter(prevState => prevState + 1);
         setListContainer((prevState) => [...prevState, newList]);
     }
 
 
 
+
     return (
 
         <View style={{flex: 1, backgroundColor: "white"}}>
+            {/* TopBar*/}
             <View style={styles.topBar}>
-
             </View>
+
+            {/* Main Content*/}
             <View style={{flexDirection: "row", flex: 1}}>
+
+                {/* SideBar*/}
                 <View style={{
                     width: isSideBarVisible ? 200 : 60,
                     borderRightWidth: 1,
@@ -87,12 +104,23 @@ export default function Index() {
                             </TouchableOpacity>
                         )}
                     </View>
+                    {/* ListContainer*/}
                     <View style={{flex: 1}}>
+                        <FlatList
+                            data={listContainer}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({item}) => (
+                                <TouchableOpacity onPress={() => setListDisplay(item)}>
+                                    {/*Add rendering for icons*/}
+                                    <Text>{item.title}</Text>
+                                </TouchableOpacity>
+                            )}
+                        />
                     </View>
 
                 </View>
                 <View style={{flex: 1}}>
-                    <ListScreen title="TaskDump"/>
+                    <ListScreen title={listDisplay.title} />
                 </View>
             </View>
         </View>
