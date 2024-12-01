@@ -1,25 +1,57 @@
 #include <iostream>
+#define WIN32_LEAN_AND_MEAN
+#include "crow.h"
+#include "crow/json.h"
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+struct Task {
+    int id;
+    std::string name;
+    bool done;
+};
+
+struct List {
+    int id;
+    std::string name;
+    std::vector<Task> tasks;
+};
+
+std::vector<List> lists;
+int next_list_id = 0;
+int next_task_id = 0;
+
 int main() {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the
-    // <b>lang</b> variable name to see how CLion can help you rename it.
-    auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
+    //creating a simple crow app
+    crow::SimpleApp app;
 
-    for (int i = 1; i <= 5; i++) {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code.
-        // We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/>
-        // breakpoint for you, but you can always add more by pressing
-        // <shortcut actionId="ToggleLineBreakpoint"/>.
-        std::cout << "i = " << i << std::endl;
-    }
+    CROW_ROUTE(app, "/")([]() {
+        return "Hello World!";
+    });
 
-    return 0;
+    CROW_ROUTE(app, "/lists").methods(crow::HTTPMethod::Get)([]() {
+        crow::json::wvalue result;
+
+        int taskindex = 0;
+        for (auto &list: lists) {
+            crow::json::wvalue list_json;
+            list_json["id"] = list.id;
+            list_json["name"] = list.name;
+
+
+            // Create a JSON list for tasks
+            crow::json::wvalue tasksJson = crow::json::wvalue::list();
+            int pos = 0;
+            for (auto &task: list.tasks) {
+                crow::json::wvalue taskjson;
+                taskjson["id"] = task.id;
+                taskjson["name"] = task.name;
+                taskjson["done"] = task.done;
+                tasksJson["tasks"][pos++] = {taskjson};
+            }#
+            tasksJson.clear();
+            list_json["tasks"] = {tasksJson};
+            //add the list to the result and so oon
+
+        }
+    });
 }
-
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.

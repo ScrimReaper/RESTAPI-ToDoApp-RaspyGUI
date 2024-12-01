@@ -1,3 +1,3 @@
-C:/Users/User/OneDrive/Dokumente/Programming/Apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/API.dir
-C:/Users/User/OneDrive/Dokumente/Programming/Apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/User/OneDrive/Dokumente/Programming/Apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/programming/apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/API.dir
+D:/programming/apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/programming/apps/1_project_todolistapp/API/cmake-build-debug/CMakeFiles/rebuild_cache.dir

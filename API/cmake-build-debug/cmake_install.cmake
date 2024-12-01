@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/User/OneDrive/Dokumente/Programming/Apps/1_project_todolistapp/API
+# Install script for directory: D:/programming/apps/1_project_todolistapp/API
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -52,6 +52,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "C:/Users/User/OneDrive/Dokumente/Programming/Apps/1_project_todolistapp/API/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "D:/programming/apps/1_project_todolistapp/API/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
