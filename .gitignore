@@ -18,3 +18,50 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+# CLion Project Files
+.idea/
+
+# CMake and Build Artifacts
+cmake-build-debug/
+cmake-build-release/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+CMakeLists.txt.user
+compile_commands.json
+Testing/
+CTestTestfile.cmake
+install_manifest.txt
+
+# Build Artifacts
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dll
+*.dylib
+
+# Visual Studio Code Workspace
+.vscode/
+
+# System-Specific Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# CLion Logs and Cache
+*.log
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/modules.xml
+.idea/.name
+cmake-build-*
+
+# Crow Library or Other Third-Party Libraries
+Crow/build/
+Crow/*.o
+Crow/*.obj
+Crow/*.exe
