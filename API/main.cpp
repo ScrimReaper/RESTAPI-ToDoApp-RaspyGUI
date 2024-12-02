@@ -17,7 +17,7 @@ struct List {
     std::vector<Task> tasks;
 };
 
-std::unordered_map<std::string,List> lists;
+std::unordered_map<int, List> lists; //hashing by id
 int next_list_id = 0;
 int next_task_id = 0;
 
@@ -25,13 +25,13 @@ int main() {
     //creating a simple crow app
     crow::SimpleApp app;
 
+
     CROW_ROUTE(app, "/")([]() {
         return "Hello World!";
     });
 
-    CROW_ROUTE(app, "/lists").methods(crow::HTTPMethod::GET)([]() {
-        crow::json::wvalue result;
-        int pos = 0;
+    CROW_ROUTE(app, "/lists").methods("GET"_method)([]() {
+        crow::json::wvalue::list result;
 
         if (lists.empty()) {
             return crow::response(204);
@@ -51,31 +51,91 @@ int main() {
                 task_json["id"] = task.id;
                 task_json["name"] = task.name;
                 task_json["done"] = task.done;
-                tasks_Json.push_back(task_json);
+                tasks_Json.push_back(std::move(task_json));
                 task_json.clear();
             }
-            list_json["tasks"] = {tasks_Json};
+            list_json["tasks"] = std::move(tasks_Json);
             //add to result
-            result["lists"][pos++] = {list_json};
+            result.push_back(std::move(list_json));
             list_json.clear();
         }
-        return crow::response(200, result);
+
+        crow::json::wvalue out;
+        out["lists"] = std::move(result);
+        return crow::response(200, out);
     });
 
-    CROW_ROUTE(app, "/lists").methods(crow::HTTPMethod::POST)([](std::string name) {
+    CROW_ROUTE(app, "/lists").methods("POST"_method)([](const crow::request& req){
+        auto json = crow::json::load(req.body);
+        if (!json || !json.has("name")) {
+            return crow::response(400);
+        }
+
+        std::string name = json["name"].s();
         //check if the list is empty
         if (name.empty()) {
             return crow::response(400);
         }
 
-        //if the name already exists in the map return bad request
-        if (lists.find(name) != lists.end()) {
-            return crow::response(400);
-        }
-
+        //create a new list
         List list;
         list.id = next_list_id++;
         list.name = name;
         list.tasks = {};
+        lists[list.id] = std::move(list);
+
+        //return created
+        crow::json::wvalue result;
+        result["id"] = list.id;
+        result["name"] = list.name;
+
+        return crow::response(201, result);
     });
+
+    CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([](const int id){
+        // Check if the list exists
+        if (!lists.contains(id)) {
+            return crow::response(404, "List not found.");
+        }
+
+        // Delete the list
+        lists.erase(id);
+
+        // Return no content response
+        return crow::response(204, "Deleted list with id: " + std::to_string(id));
+    });
+
+    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([](const crow::request& req, crow::response& res, int id){
+        // Check if the list exists
+        if (!lists.contains(id)) {
+            res.code = 404;
+            res.body = "List not found.";
+            res.end();
+            return;
+        }
+
+        // Load the JSON from the request
+        auto json = crow::json::load(req.body);
+        if (!json || !json.has("name")) {
+            res.code = 400;
+            res.body = "Invalid JSON.";
+            res.end();
+            return;
+        }
+
+        // Update the list
+        List& list = lists[id];
+        list.name = json["name"].s();
+
+        // Return the updated list
+        crow::json::wvalue result;
+        result["id"] = list.id;
+        result["name"] = list.name;
+        res.code = 200;
+        res.body = result.dump();
+        res.end();
+
+    });
+    app.port(18080).run();
+
 }
