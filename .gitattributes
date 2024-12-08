@@ -1,0 +1,7 @@
+# C++ files
+*.cpp linguist-language=C++
+*.h linguist-language=C++
+
+# TypeScript files
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
