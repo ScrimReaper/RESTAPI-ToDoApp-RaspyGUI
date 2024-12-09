@@ -1,5 +1,7 @@
 #include <iostream>
 #define WIN32_LEAN_AND_MEAN
+#include <math.h>
+
 #include "crow.h"
 #include "crow/json.h"
 #include <unordered_map>
@@ -20,12 +22,23 @@ struct List {
 std::unordered_map<int, List> lists; //hashing by id
 int next_list_id = 0;
 int next_task_id = 0;
+int BADREQUEST = 400;
+int NOTFOUND = 404;
+int CREATED = 201;
+int NOCONTENT = 204;
+int OK = 200;
 
 
 //TODO: Add all the task specific routes
 int main() {
     //creating a simple crow app
     crow::SimpleApp app;
+
+    List taskdump;
+    taskdump.id = next_list_id++;
+    taskdump.name = "TaskDump";
+    taskdump.tasks = {};
+    lists[taskdump.id] = std::move(taskdump);
 
 
     CROW_ROUTE(app, "/")([]() {
@@ -139,6 +152,7 @@ int main() {
         res.end();
     });
 
+    //return the tasks of a list
     CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([](int id) {
         //check if the list exists
         if (!lists.contains(id)) {
@@ -161,6 +175,7 @@ int main() {
         return crow::response(200, out);
     });
 
+    //add tasks to the list
     CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([](const crow::request &req, int id) {
         auto json = crow::json::load(req.body);
 
@@ -207,6 +222,60 @@ int main() {
 
         return crow::response(201, result);
     });
+
+    //delte a specific task
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([](int list_id, int task_id) {
+        //check if the list exists
+        if (!lists.contains(list_id)) {
+            return crow::response(NOTFOUND, "List not found.");
+        }
+
+        //check if the task exists
+        List &list = lists[list_id];
+        std::vector<Task> &tasks = list.tasks;
+        int c;
+        for (auto &task: tasks) {
+            if (task.id == task_id) {
+                tasks.erase(tasks.begin() + c);
+                return crow::response(NOCONTENT);
+            }
+            c++;
+        }
+        return crow::response(404, "Task not found.");
+    });
+
+    //update a specific task
+    CROW_ROUTE(app, "/list<int>/tasks/<int>").methods("PUT"_method)(
+        [](const crow::request &req, int list_id, int task_id) {
+            //check the input
+            //check if the list exists
+            if (!lists.contains(list_id)) {
+                return crow::response(NOTFOUND, "List not found.");
+            }
+            //check the request
+            auto json = crow::json::load(req.body);
+            if (!json) {
+                return crow::response(BADREQUEST, "Invalid or missing JSON Body") {
+                }
+            }
+
+            if (!json.has("name") || !json.has("done")) {
+                return crow::response(BADREQUEST, "Missing crucial fields");
+            }
+
+
+            //check for the task
+            List &list = lists[list_id];
+            for (Task &task: list) {
+                if (task.id == task_id) {
+                    task.done = json["done"].b();
+                    task.name = json["name"].s();
+                    return crow::response(OK, "Task was successfully updated");
+                }
+            }
+
+            return crow::response(NOTFOUND, "Task was not found");
+        });
 
 
     app.port(18080).run();
