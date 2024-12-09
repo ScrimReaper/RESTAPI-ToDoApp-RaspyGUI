@@ -21,6 +21,8 @@ struct List {
 
 constexpr auto NAME_FIELD = "name";
 constexpr auto DONE_FIELD = "done";
+constexpr auto ID_FIELD = "id";
+constexpr auto TASKS_FIELD = "tasks";
 
 std::unordered_map<int, List> lists; //hashing by id
 int next_list_id = 0;
@@ -30,6 +32,11 @@ int NOTFOUND = 404;
 int CREATED = 201;
 int NOCONTENT = 204;
 int OK = 200;
+
+bool validateTaskJson(const crow::json::rvalue &task) {
+    return task.has(NAME_FIELD) && task.has(DONE_FIELD) && task.has(ID_FIELD);
+}
+
 
 
 //TODO: Add all the task specific routes
@@ -178,32 +185,73 @@ int main() {
         return crow::response(200, out);
     });
 
-    //add tasks to the list
+    /**
+     * @brief Adds tasks to a specific list.
+     *
+     * This method handles a POST request to add multiple tasks to a list identified
+     * by its ID. The tasks are provided as an array in the JSON body. Each task must
+     * include the fields 'name' (string), 'done' (boolean), and 'id' (integer).
+     *
+     * @param req The HTTP request object containing the JSON payload.
+     *            The payload must include an array under the key "tasks".
+     * @param id The ID of the list to which the tasks should be added.
+     * @return A crow::response object with the following:
+     *         - 201 CREATED: Returns the updated list, including the added tasks.
+     *         - 404 NOT FOUND: If the list with the given ID does not exist.
+     *         - 400 BAD REQUEST: If the JSON body is invalid or required fields are missing/incorrect.
+     *
+     * @throws std::exception if the JSON parsing fails or invalid data types are encountered.
+     *
+     * @note This method validates each task's fields and type safety. If any task fails validation,
+     *       the process stops, and an error is returned.
+     */
     CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([](const crow::request &req, int id) {
         auto json = crow::json::load(req.body);
 
         //if there is no id to assign the tasks to they cant be posted
-        if (!json || !json.has("tasks")) {
-            return crow::response(400);
+        if (!json || !json.has(TASKS_FIELD)) {
+            return crow::response(BADREQUEST, "Invalid or missing JSON Body");
         }
 
         //check if the id exists
-
         if (!lists.contains(id)) {
-            return crow::response(404, "List not found.");
+            return crow::response(NOTFOUND, "List not found.");
         }
 
-        //TODO fix the fore loop, its not compiling
-        std::vector<crow::json::rvalue> tasks = json["tasks"].lo();
+        //check if the tasks are valid and the type is correct
+        std::vector<crow::json::rvalue> tasks;
+        try {
+            tasks = json[TASKS_FIELD].lo();
+        } catch (const std::exception &e) {
+            return crow::response(BADREQUEST, "Invalid Type for 'tasks'. Must be an array.");
+        }
 
         //add all the tasks to the list
         List &addTo = lists[id];
 
         for (auto &task: tasks) {
             Task v;
-            v.id = task["id"].i();
-            v.name = task["name"].s();
-            v.done = task["done"].b();
+            //check if the task is valid
+            if (!validateTaskJson(task)) {
+                return crow::response(BADREQUEST, "Missing required fields: 'name' and/or 'done' and/or 'id'.");
+            }
+
+            //cjheck if the fields are of the correct type
+            std::string task_name;
+            bool done_temp;
+            int id_temp;
+            try {
+                task_name = task[NAME_FIELD].s();
+                done_temp = task[DONE_FIELD].b();
+                id_temp = task[ID_FIELD].i();
+            } catch (const std::exception &e) {
+                return crow::response(BADREQUEST, "Invalid type for 'done': must be a boolean or 'name': must be a string.");
+            }
+
+            //add the task to the list
+            v.done = done_temp;
+            v.name = task_name;
+            v.id = id_temp;
 
             addTo.tasks.push_back(std::move(v));
         }
@@ -211,22 +259,36 @@ int main() {
         //return the new results
 
         crow::json::wvalue result;
-        result["id"] = addTo.id;
-        result["name"] = addTo.name;
+        result[ID_FIELD] = addTo.id;
+        result[NAME_FIELD] = addTo.name;
         crow::json::wvalue::list task_list;
         for (Task &task: addTo.tasks) {
             crow::json::wvalue task_json;
-            task_json["id"] = task.id;
-            task_json["name"] = task.name;
-            task_json["done"] = task.done;
+            task_json[ID_FIELD] = task.id;
+            task_json[NAME_FIELD] = task.name;
+            task_json[DONE_FIELD] = task.done;
             task_list.push_back(std::move(task_json));
         }
-        result["tasks"] = std::move(task_list);
+        result[TASKS_FIELD] = std::move(task_list);
 
-        return crow::response(201, result);
+        return crow::response(CREATED, result);
     });
 
-    //delte a specific task
+    /**
+     * @brief Deletes a specific task from a list.
+     *
+     * This method handles a DELETE request to remove a task from a list identified
+     * by its ID. The task is specified by its unique `task_id`.
+     *
+     * @param list_id The ID of the list containing the task to delete.
+     * @param task_id The ID of the task to be removed from the list.
+     * @return A crow::response object with the following:
+     *         - 204 NO CONTENT: If the task is successfully deleted.
+     *         - 404 NOT FOUND: If the list or task does not exist.
+     *
+     * @note The task is removed from the list in-place. If no task matches the given
+     *       `task_id`, the method returns a 404 response.
+     */
     CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([](int list_id, int task_id) {
         //check if the list exists
         if (!lists.contains(list_id)) {
@@ -276,13 +338,13 @@ int main() {
                 return crow::response(NOTFOUND, "List not found.");
             }
             //check the request
-            auto json = crow::json::load(req.body);
+            auto task_json = crow::json::load(req.body);
             //check if the json is valid
-            if (!json) {
+            if (!task_json) {
                 return crow::response(BADREQUEST, "Invalid or missing JSON Body");
             }
             //check if the required fields are present
-            if (!json.has(NAME_FIELD) || !json.has(DONE_FIELD)) {
+            if (!validateTaskJson(task_json)) {
                 return crow::response(BADREQUEST, "Missing required fields: 'name' and/or 'done'.");
             }
 
@@ -290,10 +352,11 @@ int main() {
             bool is_done;
             std::string task_name;
             try {
-                is_done = json[DONE_FIELD].b();
-                task_name = json[NAME_FIELD].s();
+                is_done = task_json[DONE_FIELD].b();
+                task_name = task_json[NAME_FIELD].s();
             } catch (const std::exception &e) {
-                return crow::response(BADREQUEST, "Invalid type for 'done': must be a boolean.");
+                return crow::response(
+                    BADREQUEST, "Invalid type for 'done': must be a boolean or 'name': must be a string.");
             }
 
 
