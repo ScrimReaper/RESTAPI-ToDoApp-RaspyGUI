@@ -130,7 +130,7 @@ int main() {
         return crow::response(204, "Deleted list with id: " + std::to_string(id));
     });
 
-
+    //TODO: Get rid of the res param
     CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([](const crow::request &req, crow::response &res, int id) {
         // Check if the list exists
         if (!lists.contains(id)) {
@@ -139,7 +139,7 @@ int main() {
             res.end();
             return;
         }
-
+        
         // Load the JSON from the request
         auto json = crow::json::load(req.body);
         if (!json || !json.has("name")) {
