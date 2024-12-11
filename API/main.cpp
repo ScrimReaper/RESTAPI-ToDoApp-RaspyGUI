@@ -7,17 +7,8 @@
 #include "constants/HttpStatus.h"
 #include "constants/JsonF.h"
 
-struct Task {
-    int id;
-    std::string name;
-    bool done;
-};
 
-struct List {
-    int id;
-    std::string name;
-    std::vector<Task> tasks;
-};
+
 
 
 constexpr auto TASKS_FIELD = "tasks";

@@ -6,7 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 # Add executable
 add_executable(API main.cpp
         constants/HttpStatus.h
-        constants/JsonF.h)
+        constants/JsonF.h
+        routes/Routes.h
+        tasks/Task.h
+        tasks/TaskList.h)
 
 # Include Crow headers
 include_directories("D:/programming/libraries/C++/Crow/include")
