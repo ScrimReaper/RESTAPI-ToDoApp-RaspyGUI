@@ -5,21 +5,40 @@
 #ifndef TASKLIST_H
 #define TASKLIST_H
 #include <string>
-#include <vector>
+#include <unordered_map>
+#include <utility>
 #include "Task.h"
 
 class TaskList {
-    const int id;
-    const std::string name;
-    std::vector<Task> tasks;
+    int id;
+    std::string name;
+    /**
+     * A map of tasks in the list, hashed by their ID.
+     */
+    std::unordered_map<int, Task> tasks;
+    int next_task_id = 0;
+    int getNextTaskID() { return next_task_id++; }
 
 public:
-    TaskList(int id, std::string name) : id(id), name(std::move(name)) {
+    TaskList(const int id, std::string name) : id(id), name(std::move(name)) {
     }
 
-    int getID() & { return id; }
-    std::string getName() & { return name; }
-    std::vector<Task> getTasks() { return tasks; }
+
+    const int &getID() { return id; }
+    const std::string &getName() { return name; }
+    const std::unordered_map<int, Task> &getTasks() { return tasks; }
+    /**
+     *
+     * @param newName cannot be empty, new Name to be set
+     */
+    void setName(std::string newName);
+
+
+    int postTask(std::string taskBody);
+
+    bool putTask(int taskId, std::string taskBody, bool done);
+
+    bool deleteTask(int taskId);
 };
 
 #endif //TASKLIST_H

@@ -11,7 +11,6 @@
 
 
 
-constexpr auto TASKS_FIELD = "tasks";
 
 std::unordered_map<int, List> lists; //hashing by id
 int next_list_id = 0;
@@ -19,7 +18,7 @@ int next_task_id = 0;
 
 
 bool validateTaskJson(const crow::json::rvalue &task) {
-    return task.has(JsonF::task::NAME) && task.has(JsonF::task::DONE) && task.has(JsonF::task::ID);
+    return task.has(JsonF::task::TASKBODY) && task.has(JsonF::task::DONE) && task.has(JsonF::task::ID);
 }
 
 
@@ -226,7 +225,7 @@ int main() {
             bool done_temp;
             int id_temp;
             try {
-                task_name = task[JsonF::task::NAME].s();
+                task_name = task[JsonF::task::TASKBODY].s();
                 done_temp = task[JsonF::task::DONE].b();
                 id_temp = task[JsonF::task::ID].i();
             } catch (const std::exception &e) {
@@ -245,12 +244,12 @@ int main() {
 
         crow::json::wvalue result;
         result[JsonF::task::ID] = addTo.id;
-        result[JsonF::task::NAME] = addTo.name;
+        result[JsonF::task::TASKBODY] = addTo.name;
         crow::json::wvalue::list task_list;
         for (Task &task: addTo.tasks) {
             crow::json::wvalue task_json;
             task_json[JsonF::task::ID] = task.id;
-            task_json[JsonF::task::NAME] = task.name;
+            task_json[JsonF::task::TASKBODY] = task.name;
             task_json[JsonF::task::DONE] = task.done;
             task_list.push_back(std::move(task_json));
         }
@@ -338,7 +337,7 @@ int main() {
             std::string task_name;
             try {
                 is_done = task_json[JsonF::task::DONE].b();
-                task_name = task_json[JsonF::task::NAME].s();
+                task_name = task_json[JsonF::task::TASKBODY].s();
             } catch (const std::exception &e) {
                 return crow::response(
                     HttpStatus::BADREQUEST, "Invalid type for 'done': must be a boolean or 'name': must be a string.");

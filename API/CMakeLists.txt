@@ -9,7 +9,11 @@ add_executable(API main.cpp
         constants/JsonF.h
         routes/Routes.h
         tasks/Task.h
-        tasks/TaskList.h)
+        tasks/TaskList.h
+        tasks/ListManager.h
+        tasks/ListManager.cpp
+        tasks/TaskList.cpp
+)
 
 # Include Crow headers
 include_directories("D:/programming/libraries/C++/Crow/include")

@@ -7,7 +7,7 @@
 namespace JsonF {
     namespace task {
         constexpr auto ID = "id";
-        constexpr auto NAME = "name";
+        constexpr auto TASKBODY = "taskBody";
         constexpr auto DONE = "done";
     }
 

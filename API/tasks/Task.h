@@ -6,7 +6,7 @@
 #define TASK_H
 struct Task {
     int id;
-    std::string name;
+    std::string taskBody;
     bool done;
 };
 #endif //TASK_H
