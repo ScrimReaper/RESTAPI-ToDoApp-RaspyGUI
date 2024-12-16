@@ -37,3 +37,18 @@ int ListManager::postList(std::string name) {
     container[listID] = std::move(TaskList(listID, std::move(name)));
     return listID;
 }
+
+std::unordered_map<int, std::string> ListManager::getLists() {
+    std::unordered_map<int, std::string> list;
+    if (container.empty()) {
+        return list;
+    }
+    for (const auto &pair : container) {
+        int key = pair.first;
+        TaskList tempList = pair.second;
+        std::string name = tempList.getName();
+        list[key] = std::move(name);
+    }
+
+    return list;
+}

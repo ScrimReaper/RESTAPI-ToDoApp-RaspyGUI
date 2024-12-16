@@ -15,15 +15,17 @@ class ListManager {
 public:
     ListManager() = default;
 
-
-    const std::unordered_map<int, TaskList> &getLists() { return container; }
+    /**
+     * @return The Names of the Lists as Strings mapped to the IDs
+     */
+    std::unordered_map<int, std::string> getLists();
 
     bool deleteList(int listId);
 
     TaskList getList(int list_id);
 
-    bool putList(int listId, std::string name) ;
+    bool putList(int listId, std::string name);
 
-    int postList(std::string name) ;
+    int postList(std::string name);
 };
 #endif //LISTMANAGER_H

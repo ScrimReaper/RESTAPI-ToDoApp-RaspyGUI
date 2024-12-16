@@ -26,7 +26,7 @@ public:
 
 
     const int &getID() { return id; }
-    const std::string &getName() { return name; }
+    std::string getName() { return name; }
     const std::unordered_map<int, Task> &getTasks() { return tasks; }
     /**
      *

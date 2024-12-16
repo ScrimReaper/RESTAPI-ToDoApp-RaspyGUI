@@ -11,6 +11,6 @@
 
 class Routes {
 public:
-    void setUpRoutes(crow::SimpleApp app, ListManager listManager);
+    static void setUpRoutes(crow::SimpleApp& app, ListManager& listManager);
 };
 #endif //ROUTES_H

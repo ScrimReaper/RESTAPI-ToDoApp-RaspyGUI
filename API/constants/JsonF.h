@@ -24,7 +24,8 @@ namespace JsonF {
          * @param task the task to be checked
          * @return
          */
-        bool validateTaskJson(const crow::json::rvalue &task);
+        static bool validateTaskJson(const crow::json::rvalue &task);
+        static crow::json::wvalue toJson(const std::unordered_map<int, std::string> &items);
     }
 }
 #endif //JSONFIELDS_H

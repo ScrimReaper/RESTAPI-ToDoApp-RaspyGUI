@@ -21,3 +21,18 @@ bool JsonF::util::validateTaskJson(const crow::json::rvalue &task) {
 
     return hasFields && taskbody.size() != 0;
 }
+
+crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, std::string> &items) {
+    if (items.empty()) {
+        throw new std::invalid_argument("Json items is empty");
+    }
+    crow::json::wvalue::list output;
+    for (const auto &pair: items) {
+        crow::json::wvalue item;
+        item["id"] = pair.first;
+        item["name"] = pair.second;
+        output.push_back(std::move(item));
+    }
+
+    return output;
+}
