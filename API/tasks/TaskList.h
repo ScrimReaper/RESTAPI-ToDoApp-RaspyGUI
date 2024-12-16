@@ -4,6 +4,7 @@
 
 #ifndef TASKLIST_H
 #define TASKLIST_H
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -31,7 +32,13 @@ public:
      *
      * @param newName cannot be empty, new Name to be set
      */
-    void setName(std::string newName);
+    void setName(std::string newName) {
+        if (name.empty()) {
+            throw new std::invalid_argument("Name cannot be empty.");
+        }
+
+        this->name = std::move(newName);
+    }
 
 
     int postTask(std::string taskBody);

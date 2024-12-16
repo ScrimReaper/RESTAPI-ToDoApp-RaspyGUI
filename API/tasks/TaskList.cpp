@@ -8,13 +8,6 @@
 
 #include "Task.h"
 
-void TaskList::setName(std::string newName) {
-    if (name.empty()) {
-        throw new std::invalid_argument("Name cannot be empty.");
-    }
-
-    this->name = std::move(newName);
-}
 
 int TaskList::postTask(std::string taskBody ) {
     if (taskBody.empty()) {
