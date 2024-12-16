@@ -28,4 +28,24 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::OK, returnVal);
     });
+
+    /**
+     * This Method adds a new List with a given name to the list manager and returns its name and ID to the caller
+     */
+    CROW_ROUTE(app, "/lists").methods("POST"_method)([&listManager](const crow::request &req) {
+        auto json = crow::json::load(req.body);
+
+        if (!JsonF::util::validateListReqJson(json)) {
+            return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+        }
+
+        const std::string newName = json[JsonF::list::NAME].s();
+        int newId = listManager.postList(std::move(newName));
+
+        //return name and id in a json
+        crow::json::wvalue returnVal;
+        returnVal["id"] = newId;
+        returnVal["name"] = newName;
+        return crow::response(HttpStatus::CREATED, returnVal);
+    });
 }

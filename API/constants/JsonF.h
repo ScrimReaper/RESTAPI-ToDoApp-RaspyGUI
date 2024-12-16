@@ -26,6 +26,7 @@ namespace JsonF {
          */
         static bool validateTaskJson(const crow::json::rvalue &task);
         static crow::json::wvalue toJson(const std::unordered_map<int, std::string> &items);
+        static bool validateListReqJson(const crow::json::rvalue &list);
     }
 }
 #endif //JSONFIELDS_H
