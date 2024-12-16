@@ -34,6 +34,7 @@ const ListScreen: React.FC<ListScreenProps> = ({ title }: ListScreenProps) => {
         setTimeout(() => inputRef.current?.focus(), 100);
     };
 
+
     //update task name
     const updateTask = (taskId: string, taskName: string) => {
         setTasks((prevstate) =>
