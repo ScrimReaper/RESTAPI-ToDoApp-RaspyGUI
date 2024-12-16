@@ -4,5 +4,13 @@
 
 #ifndef ROUTES_H
 #define ROUTES_H
+#include <crow/app.h>
 
+#include "../tasks/ListManager.h"
+
+
+class Routes {
+public:
+    void setUpRoutes(crow::SimpleApp app, ListManager listManager);
+};
 #endif //ROUTES_H

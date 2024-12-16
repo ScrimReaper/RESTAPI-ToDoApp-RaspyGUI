@@ -13,6 +13,7 @@ add_executable(API main.cpp
         tasks/ListManager.h
         tasks/ListManager.cpp
         tasks/TaskList.cpp
+        constants/JsonUtils.cpp
 )
 
 # Include Crow headers

@@ -17,9 +17,7 @@ int next_list_id = 0;
 int next_task_id = 0;
 
 
-bool validateTaskJson(const crow::json::rvalue &task) {
-    return task.has(JsonF::task::TASKBODY) && task.has(JsonF::task::DONE) && task.has(JsonF::task::ID);
-}
+
 
 
 

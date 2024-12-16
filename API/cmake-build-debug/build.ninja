@@ -70,6 +70,13 @@ build CMakeFiles/API.dir/tasks/TaskList.cpp.obj: CXX_COMPILER__API_unscanned_Deb
   OBJECT_DIR = CMakeFiles\API.dir
   OBJECT_FILE_DIR = CMakeFiles\API.dir\tasks
 
+build CMakeFiles/API.dir/constants/JsonUtils.cpp.obj: CXX_COMPILER__API_unscanned_Debug D$:/programming/apps/1_project_todolistapp/API/constants/JsonUtils.cpp || cmake_object_order_depends_target_API
+  DEP_FILE = CMakeFiles\API.dir\constants\JsonUtils.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  INCLUDES = -ID:/programming/libraries/C++/Crow/include -ID:/programming/libraries/C++/asio-1.30.2/include
+  OBJECT_DIR = CMakeFiles\API.dir
+  OBJECT_FILE_DIR = CMakeFiles\API.dir\constants
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target API
@@ -78,7 +85,7 @@ build CMakeFiles/API.dir/tasks/TaskList.cpp.obj: CXX_COMPILER__API_unscanned_Deb
 #############################################
 # Link the executable API.exe
 
-build API.exe: CXX_EXECUTABLE_LINKER__API_Debug CMakeFiles/API.dir/main.cpp.obj CMakeFiles/API.dir/tasks/ListManager.cpp.obj CMakeFiles/API.dir/tasks/TaskList.cpp.obj
+build API.exe: CXX_EXECUTABLE_LINKER__API_Debug CMakeFiles/API.dir/main.cpp.obj CMakeFiles/API.dir/tasks/ListManager.cpp.obj CMakeFiles/API.dir/tasks/TaskList.cpp.obj CMakeFiles/API.dir/constants/JsonUtils.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lws2_32  -lMswsock  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\API.dir
