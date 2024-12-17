@@ -35,7 +35,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
     CROW_ROUTE(app, "/lists").methods("POST"_method)([&listManager](const crow::request &req) {
         auto json = crow::json::load(req.body);
 
-        if (!JsonF::util::validateListReqJson(json)) {
+        if (!JsonF::util::validatePReqList(json)) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
@@ -49,6 +49,9 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 
+    /**
+     * This Mehthod deletes a List from the Manager
+     */
     CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([&listManager](const int id) {
         const bool successfull = listManager.deleteList(id);
 
@@ -57,5 +60,30 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         }
 
         return crow::response(204, "Deleted list with id: " + std::to_string(id));
+    });
+
+    /*
+     * This Method changes the name of a List and returns the new Listname and its id
+     */
+    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([&listManager](const crow::request &req, int id) {
+        const auto json = crow::json::load(req.body);
+
+        if (!JsonF::util::validatePReqList(json)) {
+            return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+        }
+
+        const std::string newName = json[JsonF::list::NAME].s();
+        bool successfull = listManager.putList(id, std::move(newName));
+
+        if (!successfull) {
+            return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+        }
+
+        crow::json::wvalue returnVal;
+
+        returnVal["id"] = id;
+        returnVal["name"] = newName;
+
+        return crow::response(HttpStatus::OK, returnVal);
     });
 }

@@ -37,11 +37,11 @@ crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, std::string
     return output;
 }
 
-bool JsonF::util::validateListReqJson(const crow::json::rvalue &list) {
-    bool hasField = list.has(list::NAME);
+bool JsonF::util::validatePReqList(const crow::json::rvalue &req) {
+    bool hasField = req.has(list::NAME);
     std::string listName;
     try {
-        listName = std::move(list[list::NAME].s());
+        listName = std::move(req[list::NAME].s());
     } catch (const std::exception &) {
         return false;
     }
@@ -49,4 +49,6 @@ bool JsonF::util::validateListReqJson(const crow::json::rvalue &list) {
     return hasField && listName.size() != 0;
 
 }
+
+
 
