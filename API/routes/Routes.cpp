@@ -39,7 +39,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
-        const std::string newName = json[JsonF::list::NAME].s();
+        std::string newName = json[JsonF::list::NAME].s();
         int newId = listManager.postList(std::move(newName));
 
         //return name and id in a json
@@ -59,7 +59,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
         }
 
-        return crow::response(204, "Deleted list with id: " + std::to_string(id));
+        return crow::response( HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
     });
 
     /*
@@ -72,7 +72,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
-        const std::string newName = json[JsonF::list::NAME].s();
+        std::string newName = json[JsonF::list::NAME].s();
         bool successfull = listManager.putList(id, std::move(newName));
 
         if (!successfull) {
@@ -87,21 +87,27 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         return crow::response(HttpStatus::OK, returnVal);
     });
 
-    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int id) {
-        const std::unordered_map<int, Task> &tasks = listManager.getTasks(id);
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int listId) {
+        const std::unordered_map<int, Task> &tasks = listManager.getTasks(listId);
 
-        crow::json::wvalue::list returnVal;
+        crow::json::wvalue returnVal;
         if (tasks.empty()) {
-            return (HttpStatus::OK, returnVal);
+            return crow::response(HttpStatus::OK, returnVal);
         }
         crow::json::wvalue temp;
 
-        for (const auto &task: tasks) {
-            const Task &tempTask = task.second;
+
+        //TODO: add helper function for that whole Block
+        crow::json::wvalue::list taskList;
+        for (const auto &[id, task]: tasks) {
+            const Task &tempTask = task;
             temp[JsonF::task::ID] = tempTask.id;
             temp[JsonF::task::TASKBODY] = tempTask.taskBody;
-            returnVal.push_back(std::move(temp));
+            taskList.push_back(std::move(temp));
         }
-        return (HttpStatus::OK, returnVal);
+
+        returnVal["id"] = listId;
+        returnVal["tasks"] = std::move(taskList);
+        return crow::response(HttpStatus::OK, returnVal);
     });
 }
