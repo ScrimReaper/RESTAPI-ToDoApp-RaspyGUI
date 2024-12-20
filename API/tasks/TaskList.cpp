@@ -25,7 +25,7 @@ int TaskList::postTask(std::string taskBody ) {
 
 bool TaskList::putTask(const int taskId, std::string taskBody, bool done) {
     if (name.empty()) {
-        throw new std::invalid_argument("Name cannot be empty.");
+        throw std::invalid_argument("Name cannot be empty.");
     }
     if (!tasks.contains(taskId)) {
         return false;

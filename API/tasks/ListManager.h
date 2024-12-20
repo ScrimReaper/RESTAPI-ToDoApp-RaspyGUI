@@ -22,10 +22,15 @@ public:
 
     bool deleteList(int listId);
 
-    TaskList getList(int list_id);
 
     bool putList(int listId, std::string name);
 
     int postList(std::string name);
+
+    const std::unordered_map<int, Task> &getTasks(int listID);
+
+    int postTask(std::string taskBody, int listId);
+    bool deleteTask(int listId, int taskId);
+    bool putTask(int listId, int taskId, std::string taskBody, bool done);
 };
 #endif //LISTMANAGER_H

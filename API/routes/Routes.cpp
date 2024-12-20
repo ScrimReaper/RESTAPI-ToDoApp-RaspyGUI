@@ -86,4 +86,9 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::OK, returnVal);
     });
+
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([](int id) {
+
+    });
+
 }

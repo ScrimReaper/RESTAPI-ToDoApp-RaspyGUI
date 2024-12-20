@@ -9,17 +9,10 @@ bool ListManager::deleteList(const int listId) {
     return container.erase(listId) != 0;
 }
 
-TaskList ListManager::getList(const int list_id) {
-    try {
-        return container.at(list_id);
-    } catch (const std::out_of_range) {
-        throw std::invalid_argument("List not found.");
-    }
-}
 
 bool ListManager::putList(const int listId, std::string name) {
     if (name.empty()) {
-        throw new std::invalid_argument("Name cannot be empty.");
+        throw std::invalid_argument("Name cannot be empty.");
     }
     if (!container.contains(listId)) {
         return false;
@@ -43,7 +36,7 @@ std::unordered_map<int, std::string> ListManager::getLists() {
     if (container.empty()) {
         return list;
     }
-    for (const auto &pair : container) {
+    for (const auto &pair: container) {
         int key = pair.first;
         TaskList tempList = pair.second;
         std::string name = tempList.getName();
@@ -51,4 +44,21 @@ std::unordered_map<int, std::string> ListManager::getLists() {
     }
 
     return list;
+}
+
+const std::unordered_map<int, Task> &ListManager::getTasks(int listID) {
+    if (container.contains(listID)) {
+        const TaskList &list = container[listID];
+        return list.getTasks();
+    }
+    throw std::invalid_argument("List not found.");
+}
+
+bool ListManager::putTask(int listId, int taskId, std::string taskBody, bool done) {
+    if (container.contains(listId)) {
+        TaskList &list = container[listId];
+
+        return list.putTask(taskId, taskBody, done);
+    }
+    return false;
 }

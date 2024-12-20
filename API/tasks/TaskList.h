@@ -25,9 +25,9 @@ public:
     }
 
 
-    const int &getID() { return id; }
+    int getID() { return id; }
     std::string getName() { return name; }
-    const std::unordered_map<int, Task> &getTasks() { return tasks; }
+    const std::unordered_map<int, Task> &getTasks() const { return tasks; }
     /**
      *
      * @param newName cannot be empty, new Name to be set
