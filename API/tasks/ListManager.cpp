@@ -62,3 +62,20 @@ bool ListManager::putTask(int listId, int taskId, std::string taskBody, bool don
     }
     return false;
 }
+
+int ListManager::postTask(std::string taskBody, int listId) {
+    if (container.contains(listId)) {
+        TaskList &list = container[listId];
+        return list.postTask(taskBody);
+    }
+    throw std::invalid_argument("List not found.");
+}
+
+bool ListManager::deleteTask(int listId, int taskId) {
+    if (container.contains(listId)) {
+        TaskList &list = container[listId];
+        return list.deleteTask(taskId);
+    }
+    return false;
+}
+
