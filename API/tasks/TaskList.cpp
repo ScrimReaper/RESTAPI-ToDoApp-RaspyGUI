@@ -17,7 +17,9 @@ int TaskList::postTask(std::string taskBody) {
     const int nextId = getNextTaskID();
     newTask.id = nextId;
     newTask.taskBody = std::move(taskBody);
-    tasks[nextId] = std::move(newTask);
+    // Using emplace to construct the object directly in the map, avoiding unnecessary default construction.
+    // This improves efficiency and eliminates the need for a default constructor in TaskList.
+    tasks.emplace(nextId, std::move(newTask)); //use emplace
 
     return nextId;
 }

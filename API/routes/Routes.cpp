@@ -21,7 +21,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
 
         try {
-            returnVal = std::move(JsonF::util::toJson(lists));
+            returnVal = std::move(JsonF::util::toJsonLists(lists));
         } catch (const std::exception &e) {
             return crow::response(HttpStatus::NOCONTENT, e.what());
         }
@@ -41,7 +41,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         std::string newName = json[JsonF::list::NAME].s();
         int newId;
         try {
-            newId = listManager.postList(std::move(newName));
+            newId = listManager.postList(newName);
         } catch (const std::invalid_argument &e) {
             return crow::response(HttpStatus::BADREQUEST, e.what());
         }
@@ -50,7 +50,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         //return name and id in a json
         crow::json::wvalue returnVal;
         returnVal["id"] = newId;
-        returnVal["name"] = newName;
+        returnVal["name"] = std::move(newName);
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 
@@ -78,7 +78,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         }
 
         std::string newName = json[JsonF::list::NAME].s();
-        bool successfull = listManager.putList(id, std::move(newName));
+        bool successfull = listManager.putList(id, newName);
 
         if (!successfull) {
             return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
@@ -86,8 +86,8 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         crow::json::wvalue returnVal;
 
-        returnVal["id"] = id;
-        returnVal["name"] = newName;
+        returnVal[JsonF::list::ID] = id;
+        returnVal[JsonF::list::NAME] = std::move(newName);
 
         return crow::response(HttpStatus::OK, returnVal);
     });
@@ -97,7 +97,8 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
     CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int listId) {
         std::unordered_map<int, Task> tasks;
         crow::json::wvalue returnVal;
-
+        returnVal[JsonF::list::ID] = listId;
+        returnVal[JsonF::list::TASKS];
         try {
             tasks = listManager.getTasks(listId);
         } catch (const std::exception &e) {
@@ -109,7 +110,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::OK, returnVal);
         }
         returnVal[JsonF::list::ID] = listId;
-        returnVal[JsonF::list::TASKS] = JsonF::util::toJson(tasks);
+        returnVal[JsonF::list::TASKS] = JsonF::util::toJsonTasks(tasks);
         return crow::response(HttpStatus::OK, returnVal);
     });
 
@@ -121,7 +122,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
-        std::string newTaskBody = json[JsonF::list::NAME].s();
+        std::string newTaskBody = json[JsonF::task::TASKBODY].s();
         int newTaskId;
         try {
             newTaskId = listManager.postTask(newTaskBody, listId);
@@ -144,32 +145,33 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
         }
 
-        return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(taskId));
+        return crow::response(HttpStatus::NOCONTENT,
+                              "Deleted task with id: " + std::to_string(taskId) + " from list wit id: " + std::to_string(
+                                  listId));
     });
 
-    CROW_ROUTE(app, "/list<int>/tasks/<int>").methods("PUT"_method)(
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("PUT"_method)(
         [&listManager](const crow::request &req, int listId, int taskId) {
-
             auto json = crow::json::load(req.body);
 
             if (!JsonF::util::validateTaskJson(json)) {
                 return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
             }
 
-            int newTaskId;
-            std::string newTaskBody = json[JsonF::task::TASKBODY].s();
 
-            try {
-                newTaskId = listManager.putTask(listId, taskId, json[JsonF::list::NAME].s());
-            } catch (const std::invalid_argument &e) {
-                return crow::response(HttpStatus::BADREQUEST, e.what());
+            std::string newTaskBody = json[JsonF::task::TASKBODY].s();
+            bool successfull = listManager.putTask(listId, taskId, newTaskBody);
+
+
+            if (!successfull) {
+                return crow::response(HttpStatus::NOTFOUND, "Invalid ID, Task does not exist");
             }
 
             crow::json::wvalue returnVal;
-            returnVal[JsonF::task::ID] = newTaskId;
+            returnVal[JsonF::task::ID] = taskId;
             returnVal[JsonF::task::TASKBODY] = newTaskBody;
 
             return crow::response(HttpStatus::OK, returnVal);
-
-        });
+        }
+    );
 }

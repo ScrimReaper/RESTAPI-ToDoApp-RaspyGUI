@@ -1,9 +1,9 @@
 //
 // Created by User on 11.12.2024.
 //
-
 #ifndef JSONFIELDS_H
 #define JSONFIELDS_H
+#include <crow/json.h>
 
 struct Task;
 
@@ -17,6 +17,7 @@ namespace JsonF {
         constexpr auto ID = "listId";
         constexpr auto NAME = "listName";
         constexpr auto TASKS = "tasks";
+        constexpr auto INITLIST = "TaskDump";
     }
 
     namespace util {
@@ -25,10 +26,10 @@ namespace JsonF {
          * @param task the task to be checked
          * @return
          */
-        static bool validateTaskJson(const crow::json::rvalue &task);
-        static crow::json::wvalue toJson(const std::unordered_map<int, std::string> &items);
-        static bool validateListJson(const crow::json::rvalue &req);
-        static crow::json::wvalue toJson(const std::unordered_map<int, Task> &items);
+        bool validateTaskJson(const crow::json::rvalue &task);
+        crow::json::wvalue toJsonTasks(const std::unordered_map<int, Task> &items);
+        crow::json::wvalue toJsonLists(const std::unordered_map<int, std::string> &items);
+        bool validateListJson(const crow::json::rvalue &req);
     }
 }
 #endif //JSONFIELDS_H

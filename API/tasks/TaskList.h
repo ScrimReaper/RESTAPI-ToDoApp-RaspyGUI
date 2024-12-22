@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+
 #include "Task.h"
 
 class TaskList {
@@ -23,6 +24,8 @@ class TaskList {
 public:
     TaskList(const int id, std::string name) : id(id), name(std::move(name)) {
     }
+
+    TaskList() = default; //default constructor for the maps
 
 
     int getID() { return id; }

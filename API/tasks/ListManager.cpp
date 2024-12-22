@@ -27,7 +27,7 @@ int ListManager::postList(std::string name) {
         throw std::invalid_argument("Name cannot be empty.");
     }
     const int listID = getNextListID();
-    container[listID] = std::move(TaskList(listID, std::move(name)));
+    container.emplace(listID, std::move(TaskList(listID, std::move(name))));
     return listID;
 }
 

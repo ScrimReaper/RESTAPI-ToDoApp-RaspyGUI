@@ -8,14 +8,11 @@
 #include "../tasks/Task.h"
 
 
-struct Task;
-
 bool JsonF::util::validateTaskJson(const crow::json::rvalue &task) {
-    bool hasFields = task.has(task::TASKBODY) && task.has(task::ID);
+    bool hasFields = task.has(task::TASKBODY);
     std::string taskbody;
     try {
-        task[task::ID].i();
-        taskbody = std::move(task[task::TASKBODY].s());
+        taskbody = task[task::TASKBODY].s();
     } catch (const std::exception &) {
         return false;
     }
@@ -24,7 +21,7 @@ bool JsonF::util::validateTaskJson(const crow::json::rvalue &task) {
     return hasFields && !taskbody.empty();
 }
 
-crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, std::string> &items) {
+crow::json::wvalue JsonF::util::toJsonLists(const std::unordered_map<int, std::string> &items) {
     crow::json::wvalue::list output;
     if (items.empty()) { return output; }
     for (const auto &pair: items) {
@@ -49,7 +46,7 @@ bool JsonF::util::validateListJson(const crow::json::rvalue &req) {
     return hasField && !listName.empty();
 }
 
-crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, Task> &items) {
+crow::json::wvalue JsonF::util::toJsonTasks(const std::unordered_map<int, Task> &items) {
     crow::json::wvalue temp;
     crow::json::wvalue::list tasklist;
     for (const auto &[id, task]: items) {
@@ -59,3 +56,4 @@ crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, Task> &item
     }
     return tasklist;
 }
+
