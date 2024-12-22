@@ -43,7 +43,7 @@ public:
 
     int postTask(std::string taskBody);
 
-    bool putTask(int taskId, std::string taskBody, bool done);
+    bool putTask(int taskId, std::string taskBody);
 
     bool deleteTask(int taskId);
 };

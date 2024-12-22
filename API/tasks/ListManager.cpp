@@ -54,11 +54,11 @@ const std::unordered_map<int, Task> &ListManager::getTasks(int listID) {
     throw std::invalid_argument("List not found.");
 }
 
-bool ListManager::putTask(int listId, int taskId, std::string taskBody, bool done) {
+bool ListManager::putTask(int listId, int taskId, std::string taskBody) {
     if (container.contains(listId)) {
         TaskList &list = container[listId];
 
-        return list.putTask(taskId, taskBody, done);
+        return list.putTask(taskId, taskBody);
     }
     return false;
 }

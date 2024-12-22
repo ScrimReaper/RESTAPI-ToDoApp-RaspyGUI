@@ -135,4 +135,41 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::CREATED, returnVal);
     });
+
+    //this method deletes a distinct task from a list
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([&listManager](int listId, int taskId) {
+        bool successfull = listManager.deleteTask(listId, taskId);
+
+        if (!successfull) {
+            return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+        }
+
+        return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(taskId));
+    });
+
+    CROW_ROUTE(app, "/list<int>/tasks/<int>").methods("PUT"_method)(
+        [&listManager](const crow::request &req, int listId, int taskId) {
+
+            auto json = crow::json::load(req.body);
+
+            if (!JsonF::util::validateTaskJson(json)) {
+                return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+            }
+
+            int newTaskId;
+            std::string newTaskBody = json[JsonF::task::TASKBODY].s();
+
+            try {
+                newTaskId = listManager.putTask(listId, taskId, json[JsonF::list::NAME].s());
+            } catch (const std::invalid_argument &e) {
+                return crow::response(HttpStatus::BADREQUEST, e.what());
+            }
+
+            crow::json::wvalue returnVal;
+            returnVal[JsonF::task::ID] = newTaskId;
+            returnVal[JsonF::task::TASKBODY] = newTaskBody;
+
+            return crow::response(HttpStatus::OK, returnVal);
+
+        });
 }

@@ -17,13 +17,12 @@ int TaskList::postTask(std::string taskBody) {
     const int nextId = getNextTaskID();
     newTask.id = nextId;
     newTask.taskBody = std::move(taskBody);
-    newTask.done = false;
     tasks[nextId] = std::move(newTask);
 
     return nextId;
 }
 
-bool TaskList::putTask(const int taskId, std::string taskBody, bool done) {
+bool TaskList::putTask(const int taskId, std::string taskBody) {
     if (name.empty()) {
         return false;
         //for future logging maybe throw the exception, for now just return false
@@ -34,7 +33,6 @@ bool TaskList::putTask(const int taskId, std::string taskBody, bool done) {
     }
     Task &task = tasks[taskId];
     task.taskBody = std::move(taskBody);
-    task.done = done;
 
     return true;
 }

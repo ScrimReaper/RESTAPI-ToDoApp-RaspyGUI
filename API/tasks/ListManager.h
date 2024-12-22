@@ -31,6 +31,6 @@ public:
 
     int postTask(std::string taskBody, int listId);
     bool deleteTask(int listId, int taskId);
-    bool putTask(int listId, int taskId, std::string taskBody, bool done);
+    bool putTask(int listId, int taskId, std::string taskBody);
 };
 #endif //LISTMANAGER_H

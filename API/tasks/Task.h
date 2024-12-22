@@ -7,6 +7,5 @@
 struct Task {
     int id;
     std::string taskBody;
-    bool done;
 };
 #endif //TASK_H
