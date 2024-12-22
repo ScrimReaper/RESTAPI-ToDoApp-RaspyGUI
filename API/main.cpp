@@ -1,10 +1,8 @@
-
 #include "constants/JsonF.h"
 #include "routes/Routes.h"
 #include "tasks/ListManager.h"
 
 
-//TODO: Add all the task specific routes
 int main() {
     //creating a simple crow app
     crow::SimpleApp app;

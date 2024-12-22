@@ -146,8 +146,8 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         }
 
         return crow::response(HttpStatus::NOCONTENT,
-                              "Deleted task with id: " + std::to_string(taskId) + " from list wit id: " + std::to_string(
-                                  listId));
+                              "Deleted task with id: " + std::to_string(taskId) + " from list wit id: " +
+                              std::to_string(listId));
     });
 
     CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("PUT"_method)(
@@ -172,6 +172,5 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             returnVal[JsonF::task::TASKBODY] = newTaskBody;
 
             return crow::response(HttpStatus::OK, returnVal);
-        }
-    );
+        });
 }
