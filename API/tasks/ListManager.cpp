@@ -24,7 +24,7 @@ bool ListManager::putList(const int listId, std::string name) {
 
 int ListManager::postList(std::string name) {
     if (name.empty()) {
-        throw new std::invalid_argument("Name cannot be empty.");
+        throw std::invalid_argument("Name cannot be empty.");
     }
     const int listID = getNextListID();
     container[listID] = std::move(TaskList(listID, std::move(name)));

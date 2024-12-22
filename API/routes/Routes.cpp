@@ -35,12 +35,17 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
     CROW_ROUTE(app, "/lists").methods("POST"_method)([&listManager](const crow::request &req) {
         auto json = crow::json::load(req.body);
 
-        if (!JsonF::util::validatePReqList(json)) {
+        if (!JsonF::util::validateListJson(json)) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
-
         std::string newName = json[JsonF::list::NAME].s();
-        int newId = listManager.postList(std::move(newName));
+        int newId;
+        try {
+            newId = listManager.postList(std::move(newName));
+        } catch (const std::invalid_argument &e) {
+            return crow::response(HttpStatus::BADREQUEST, e.what());
+        }
+
 
         //return name and id in a json
         crow::json::wvalue returnVal;
@@ -59,7 +64,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
             return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
         }
 
-        return crow::response( HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
+        return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
     });
 
     /*
@@ -68,7 +73,7 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
     CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([&listManager](const crow::request &req, int id) {
         const auto json = crow::json::load(req.body);
 
-        if (!JsonF::util::validatePReqList(json)) {
+        if (!JsonF::util::validateListJson(json)) {
             return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
@@ -87,27 +92,47 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         return crow::response(HttpStatus::OK, returnVal);
     });
 
-    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int listId) {
-        const std::unordered_map<int, Task> &tasks = listManager.getTasks(listId);
 
+    //returns a list with its tasks
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int listId) {
+        std::unordered_map<int, Task> tasks;
         crow::json::wvalue returnVal;
+
+        try {
+            tasks = listManager.getTasks(listId);
+        } catch (const std::exception &e) {
+            return crow::response(HttpStatus::BADREQUEST, e.what());
+        }
+
+
         if (tasks.empty()) {
             return crow::response(HttpStatus::OK, returnVal);
         }
-        crow::json::wvalue temp;
+        returnVal[JsonF::list::ID] = listId;
+        returnVal[JsonF::list::TASKS] = JsonF::util::toJson(tasks);
+        return crow::response(HttpStatus::OK, returnVal);
+    });
 
+    //adds a task to a list
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([&listManager](const crow::request &req, int listId) {
+        auto json = crow::json::load(req.body);
 
-        //TODO: add helper function for that whole Block
-        crow::json::wvalue::list taskList;
-        for (const auto &[id, task]: tasks) {
-            const Task &tempTask = task;
-            temp[JsonF::task::ID] = tempTask.id;
-            temp[JsonF::task::TASKBODY] = tempTask.taskBody;
-            taskList.push_back(std::move(temp));
+        if (!JsonF::util::validateTaskJson(json)) {
+            return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
         }
 
-        returnVal["id"] = listId;
-        returnVal["tasks"] = std::move(taskList);
-        return crow::response(HttpStatus::OK, returnVal);
+        std::string newTaskBody = json[JsonF::list::NAME].s();
+        int newTaskId;
+        try {
+            newTaskId = listManager.postTask(newTaskBody, listId);
+        } catch (const std::invalid_argument &e) {
+            return crow::response(HttpStatus::BADREQUEST, e.what());
+        }
+
+        crow::json::wvalue returnVal;
+        returnVal[JsonF::task::ID] = newTaskId;
+        returnVal[JsonF::task::TASKBODY] = newTaskBody;
+
+        return crow::response(HttpStatus::CREATED, returnVal);
     });
 }

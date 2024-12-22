@@ -5,16 +5,17 @@
 #ifndef JSONFIELDS_H
 #define JSONFIELDS_H
 
+struct Task;
+
 namespace JsonF {
     namespace task {
-        constexpr auto ID = "id";
+        constexpr auto ID = "taskId";
         constexpr auto TASKBODY = "taskBody";
-        constexpr auto DONE = "done";
     }
 
     namespace list {
-        constexpr auto ID = "id";
-        constexpr auto NAME = "name";
+        constexpr auto ID = "listId";
+        constexpr auto NAME = "listName";
         constexpr auto TASKS = "tasks";
     }
 
@@ -26,7 +27,8 @@ namespace JsonF {
          */
         static bool validateTaskJson(const crow::json::rvalue &task);
         static crow::json::wvalue toJson(const std::unordered_map<int, std::string> &items);
-        static bool validatePReqList(const crow::json::rvalue &req);
+        static bool validateListJson(const crow::json::rvalue &req);
+        static crow::json::wvalue toJson(const std::unordered_map<int, Task> &items);
     }
 }
 #endif //JSONFIELDS_H

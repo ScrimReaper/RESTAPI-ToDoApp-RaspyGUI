@@ -5,39 +5,39 @@
 #include <crow/json.h>
 
 #include "JsonF.h"
+#include "../tasks/Task.h"
 
+
+struct Task;
 
 bool JsonF::util::validateTaskJson(const crow::json::rvalue &task) {
-    bool hasFields = task.has(task::TASKBODY) && task.has(task::DONE) && task.has(task::ID);
+    bool hasFields = task.has(task::TASKBODY) && task.has(task::ID);
     std::string taskbody;
     try {
         task[task::ID].i();
-        task[task::DONE].b();
         taskbody = std::move(task[task::TASKBODY].s());
     } catch (const std::exception &) {
         return false;
     }
 
 
-    return hasFields && taskbody.size() != 0;
+    return hasFields && !taskbody.empty();
 }
 
 crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, std::string> &items) {
-    if (items.empty()) {
-        throw new std::invalid_argument("Json items is empty");
-    }
     crow::json::wvalue::list output;
+    if (items.empty()) { return output; }
     for (const auto &pair: items) {
         crow::json::wvalue item;
-        item["id"] = pair.first;
-        item["name"] = pair.second;
+        item[list::ID] = pair.first;
+        item[list::NAME] = pair.second;
         output.push_back(std::move(item));
     }
 
     return output;
 }
 
-bool JsonF::util::validatePReqList(const crow::json::rvalue &req) {
+bool JsonF::util::validateListJson(const crow::json::rvalue &req) {
     bool hasField = req.has(list::NAME);
     std::string listName;
     try {
@@ -46,9 +46,16 @@ bool JsonF::util::validatePReqList(const crow::json::rvalue &req) {
         return false;
     }
 
-    return hasField && listName.size() != 0;
-
+    return hasField && !listName.empty();
 }
 
-
-
+crow::json::wvalue JsonF::util::toJson(const std::unordered_map<int, Task> &items) {
+    crow::json::wvalue temp;
+    crow::json::wvalue::list tasklist;
+    for (const auto &[id, task]: items) {
+        temp[task::ID] = id;
+        temp[task::TASKBODY] = task.taskBody;
+        tasklist.push_back(std::move(temp));
+    }
+    return tasklist;
+}
