@@ -6,6 +6,9 @@
 #include <stdexcept>
 
 bool ListManager::deleteList(const int listId) {
+    if (listId == 0) {
+        return false;
+    }
     return container.erase(listId) != 0;
 }
 
@@ -72,7 +75,7 @@ int ListManager::postTask(std::string taskBody, int listId) {
 }
 
 bool ListManager::deleteTask(int listId, int taskId) {
-    if (container.contains(listId)) {
+    if (container.contains(listId) ) {
         TaskList &list = container[listId];
         return list.deleteTask(taskId);
     }
