@@ -6,9 +6,7 @@
 
 #include "../constants/HttpStatus.h"
 #include "../constants/JsonF.h"
-
-struct Middleware;
-
+template <typename Middleware>
 void Routes::setUpRoutes(crow::App<Middleware> &app, ListManager &listManager) {
     CROW_ROUTE(app, "/")([]() {
         return "Hello World!";
