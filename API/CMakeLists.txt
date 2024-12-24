@@ -33,5 +33,8 @@ FetchContent_MakeAvailable(crow)
 # Add Crow's include directory
 target_include_directories(API PRIVATE ${crow_SOURCE_DIR}/include)
 
-# Link Winsock library (if applicable)
-target_link_libraries(API PRIVATE ws2_32 Mswsock)
+# Platform-specific libraries
+if(WIN32)
+    # Link Winsock libraries only on Windows
+    target_link_libraries(API PRIVATE ws2_32 Mswsock)
+endif()
