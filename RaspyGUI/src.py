@@ -17,7 +17,7 @@ def removeItem(list,map):
         reqUrl = "http://localhost:18080/lists/0/tasks/" + str(trueID)
         response = requests.delete(url= reqUrl, headers={"API-KEY": "1234"})
         if (response.status_code == 204):
-            list.delete[i]
+            list.delete(i)
 
 root = tk.Tk()
 
