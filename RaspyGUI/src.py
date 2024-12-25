@@ -1,47 +1,96 @@
-
 import tkinter as tk
 import requests
 
 
-
 def fetchContent():
-    response = requests.get(url = "http://localhost:18080/lists/0/tasks", headers={"API-KEY": "1234"})
+    response = requests.get(
+        url="http://localhost:18080/lists/0/tasks", 
+        headers={"API-KEY": "1234"}
+    )
+
     data = response.json()
     tasks = data["tasks"]
-    task_pairs = [{"taskId": task["taskId"], "taskBody": task["taskBody"]} for task in tasks]
-    return task_pairs
 
-def removeItem(list,map):
-    for i in list.curselection():
+    return {} if tasks is None else [{"taskId": task["taskId"], "taskBody": task["taskBody"]} for task in tasks]
+
+
+def reloadContent(listboxInstnc, map):
+    listboxInstnc.delete(0, tk.END)
+    map.clear()
+    tasks = fetchContent()
+    for idx, task in enumerate(tasks):
+        listboxInstnc.insert(tk.END, f"{task['taskBody']}")
+        map[idx] = task["taskId"]
+
+
+def removeItem(listboxInstnc, map):
+    for i in listboxInstnc.curselection():
         trueID = map[i]
-        reqUrl = "http://localhost:18080/lists/0/tasks/" + str(trueID)
-        response = requests.delete(url= reqUrl, headers={"API-KEY": "1234"})
-        if (response.status_code == 204):
-            list.delete(i)
+        reqUrl = f"http://localhost:18080/lists/0/tasks/{trueID}"
+        response = requests.delete(url=reqUrl, headers={"API-KEY": "1234"})
+        if response.status_code == 204:
+            print(f"Deleted task with ID: {trueID}")
+            listboxInstnc.delete(i)
+        else:
+            print(f"Failed to delete task with ID: {trueID}. Status code: {response.status_code}")
 
+
+# Set up the main Tkinter GUI window
 root = tk.Tk()
+root.title("To-Do List")
+root.geometry("500x400")
 
-root.title("")
+# Header Section
+header_frame = tk.Frame(root, pady=10)
+header_frame.pack(fill=tk.X)
 
-root.geometry("300x200")
+header_label = tk.Label(
+    header_frame, 
+    text="Today's To-Do List", 
+    font=("Arial", 16, "bold"), 
 
+)
+header_label.pack()
 
+# Main Section with Listbox
+main_frame = tk.Frame(root,padx=10, pady=10)
+main_frame.pack(fill=tk.BOTH, expand=True)
+
+listbox = tk.Listbox(
+    main_frame, 
+    font=("Arial", 12), 
+    selectmode=tk.MULTIPLE, 
+
+    relief=tk.GROOVE, 
+    borderwidth=2
+)
+listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+# Footer Section with Buttons
+footer_frame = tk.Frame(root, bg="lightgrey", pady=10)
+footer_frame.pack(fill=tk.X)
+
+reload_button = tk.Button(
+    footer_frame, 
+    text="Reload", 
+    font=("Arial", 12), 
+    relief=tk.RAISED, 
+    command=lambda: reloadContent(listboxInstnc=listbox, map=task_map)
+)
+reload_button.pack(side=tk.LEFT, padx=20)
+
+done_button = tk.Button(
+    footer_frame, 
+    text="Done", 
+    font=("Arial", 12),
+    relief=tk.RAISED, 
+    command=lambda: removeItem(listboxInstnc=listbox, map=task_map)
+)
+done_button.pack(side=tk.RIGHT, padx=20)
+
+# Initialize task map and load initial content
 task_map = {}
-label = tk.Label(root, text="Todays To-Dos:")
-listbox = tk.Listbox(root)
-button = tk.Button(root,text = "Done",command = lambda: removeItem(listbox, task_map))
+reloadContent(listboxInstnc=listbox, map=task_map)
 
-
-
-
-tasks = fetchContent()
-for idx, task in enumerate(tasks):
-    listbox.insert(tk.END, f"Task: {task['taskBody']}")
-    task_map[idx] = task["taskId"]  # Map the Listbox index to the taskId
-    
-
-
-button.pack()
-label.pack()
-listbox.pack()
+# Run the Tkinter event loop
 root.mainloop()
