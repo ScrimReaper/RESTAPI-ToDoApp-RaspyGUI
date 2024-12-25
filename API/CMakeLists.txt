@@ -19,7 +19,6 @@ add_executable(API
         tasks/ListManager.cpp
         tasks/TaskList.cpp
         constants/JsonUtils.cpp
-        routes/Routes.cpp
         Middleware/Middleware.h
         Middleware/Middleware.cpp
 )
