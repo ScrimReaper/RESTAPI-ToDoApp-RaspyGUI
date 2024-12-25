@@ -15,7 +15,7 @@ struct Middleware {
     };
 
     Middleware() {
-        const char *env = getenv("API_KEY");
+        const char *env = std::getenv("API_KEY");
         if (!env) {
             throw std::runtime_error("API_KEY not set");
         }

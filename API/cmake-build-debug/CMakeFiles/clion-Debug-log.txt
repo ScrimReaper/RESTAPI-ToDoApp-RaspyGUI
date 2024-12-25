@@ -1,4 +1,4 @@
 /home/mo/.local/share/JetBrains/Toolbox/apps/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/mo/Documents/projects/1_project_ToDoApp/API -B /home/mo/Documents/projects/1_project_ToDoApp/API/cmake-build-debug
--- Configuring done (1.7s)
+-- Configuring done (0.9s)
 -- Generating done (0.0s)
 -- Build files have been written to: /home/mo/Documents/projects/1_project_ToDoApp/API/cmake-build-debug
