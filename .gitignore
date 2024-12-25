@@ -19,6 +19,8 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 
+bruno/
+
 # CLion Project Files
 .idea/
 
