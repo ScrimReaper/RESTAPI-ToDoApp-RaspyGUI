@@ -2,7 +2,7 @@ import tkinter as tk
 import requests
 
 
-def fetchContent():
+def fetchContent() -> dict:
     response = requests.get(
         url="http://localhost:18080/lists/0/tasks", 
         headers={"API-KEY": "1234"}
@@ -14,7 +14,7 @@ def fetchContent():
     return {} if tasks is None else [{"taskId": task["taskId"], "taskBody": task["taskBody"]} for task in tasks]
 
 
-def reloadContent(listboxInstnc, map):
+def reloadContent(listboxInstnc: tk.Listbox, map: dict):
     listboxInstnc.delete(0, tk.END)
     map.clear()
     tasks = fetchContent()
@@ -23,7 +23,7 @@ def reloadContent(listboxInstnc, map):
         map[idx] = task["taskId"]
 
 
-def removeItem(listboxInstnc, map):
+def removeItem(listboxInstnc: tk.Listbox, map: dict):
     for i in listboxInstnc.curselection():
         trueID = map[i]
         reqUrl = f"http://localhost:18080/lists/0/tasks/{trueID}"
