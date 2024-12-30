@@ -2,17 +2,21 @@
 // Created by User on 16.12.2024.
 //
 
+#include <crow/http_request.h>
 #include <crow/json.h>
+#include <crow/mustache.h>
 
 #include "JsonF.h"
 #include "../tasks/Task.h"
 
 
-bool JsonF::util::validateTaskJson(const crow::json::rvalue &task) {
-    bool hasFields = task.has(task::TASKBODY);
+bool JsonF::util::validateTaskReq(const crow::request &req) {
+    if (req.body.empty()) {return false;}
+    auto json = crow::json::load(req.body);
+    bool hasFields = json.has(task::TASKBODY);
     std::string taskbody;
     try {
-        taskbody = task[task::TASKBODY].s();
+        taskbody = json[task::TASKBODY].s();
     } catch (const std::exception &) {
         return false;
     }
@@ -34,11 +38,14 @@ crow::json::wvalue JsonF::util::toJsonLists(const std::unordered_map<int, std::s
     return output;
 }
 
-bool JsonF::util::validateListJson(const crow::json::rvalue &req) {
-    bool hasField = req.has(list::NAME);
+bool JsonF::util::validateListReq(const crow::request &req) {
+    if (req.body.empty()) { return false; }
+
+    auto json = crow::json::load(req.body);
+    bool hasField = json.has(list::NAME);
     std::string listName;
     try {
-        listName = std::move(req[list::NAME].s());
+        listName = std::move(json[list::NAME].s());
     } catch (const std::exception &) {
         return false;
     }
@@ -56,4 +63,3 @@ crow::json::wvalue JsonF::util::toJsonTasks(const std::unordered_map<int, Task> 
     }
     return tasklist;
 }
-

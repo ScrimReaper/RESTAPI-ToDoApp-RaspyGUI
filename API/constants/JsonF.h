@@ -3,6 +3,7 @@
 //
 #ifndef JSONFIELDS_H
 #define JSONFIELDS_H
+#include <crow/http_request.h>
 #include <crow/json.h>
 
 struct Task;
@@ -26,10 +27,10 @@ namespace JsonF {
          * @param task the task to be checked
          * @return
          */
-        bool validateTaskJson(const crow::json::rvalue &task);
+        bool validateTaskReq(const crow::request &task);
         crow::json::wvalue toJsonTasks(const std::unordered_map<int, Task> &items);
         crow::json::wvalue toJsonLists(const std::unordered_map<int, std::string> &items);
-        bool validateListJson(const crow::json::rvalue &req);
+        bool validateListReq(const crow::request &req);
     }
 }
 #endif //JSONFIELDS_H

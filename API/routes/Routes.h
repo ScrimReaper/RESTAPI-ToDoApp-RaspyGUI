@@ -40,11 +40,10 @@ public:
          * This Method adds a new List with a given name to the list manager and returns its name and ID to the caller
          */
         CROW_ROUTE(app, "/lists").methods("POST"_method)([&listManager](const crow::request &req) {
-            auto json = crow::json::load(req.body);
-
-            if (!JsonF::util::validateListJson(json)) {
+            if (!JsonF::util::validateListReq(req)) {
                 return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
             }
+            auto json = crow::json::load(req.body);
             std::string newName = json[JsonF::list::NAME].s();
             int newId;
             try {
@@ -78,11 +77,11 @@ public:
          * This Method changes the name of a List and returns the new Listname and its id
          */
         CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([&listManager](const crow::request &req, int id) {
-            const auto json = crow::json::load(req.body);
-
-            if (!JsonF::util::validateListJson(json)) {
+            if (!JsonF::util::validateListReq(req)) {
                 return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
             }
+
+            const auto json = crow::json::load(req.body);
 
             std::string newName = json[JsonF::list::NAME].s();
             bool successfull = listManager.putList(id, newName);
@@ -124,14 +123,14 @@ public:
         //adds a task to a list
         CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)(
             [&listManager](const crow::request &req, int listId) {
-                auto json = crow::json::load(req.body);
-
-                if (!JsonF::util::validateTaskJson(json)) {
+                if (!JsonF::util::validateTaskReq(req)) {
                     return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
                 }
 
+                auto json = crow::json::load(req.body);
                 std::string newTaskBody = json[JsonF::task::TASKBODY].s();
                 int newTaskId;
+
                 try {
                     newTaskId = listManager.postTask(newTaskBody, listId);
                 } catch (const std::invalid_argument &e) {
@@ -160,11 +159,12 @@ public:
 
         CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("PUT"_method)(
             [&listManager](const crow::request &req, int listId, int taskId) {
-                auto json = crow::json::load(req.body);
-
-                if (!JsonF::util::validateTaskJson(json)) {
+                if (!JsonF::util::validateTaskReq(req)) {
                     return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
                 }
+
+
+                auto json = crow::json::load(req.body);
 
 
                 std::string newTaskBody = json[JsonF::task::TASKBODY].s();
