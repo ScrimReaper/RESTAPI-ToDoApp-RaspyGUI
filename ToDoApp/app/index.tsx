@@ -1,23 +1,22 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput} from "react-native";
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import ListScreen from "@/components/screens/ListScreen"
 import ArrowRight from "@/components/buttons/arrowRight";
 import ArrowLeft from "@/components/buttons/arrowLeft";
 import PlusIcon from "@/components/buttons/plusIcon";
 import Sample from "@/components/listIcons/sample";
-import {fetchList} from "@/functions/requests";
+import {fetchList, fetchTasks} from "@/functions/requests";
+import {List, Task} from "@/app/types";
 
 
-interface List {
-    listName: string;
-    listId: number;
-}
+
 
 
 export default function Index() {
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
     const [listContainer, setListContainer] = useState<List[]>([]);
-    const [listDisplay, setListDisplay] = useState<number>(0); //initially fetches the Taskdump (id: 0)
+    const [displayedList, setDisplayedList] = useState<List>({listName: "", listId: 0});
+    const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
 
     // Add a new list to the listContainer and increment the listCounter
     const addList = () => {
@@ -27,8 +26,11 @@ export default function Index() {
          */
     }
 
+
     const renderList = ({item}: { item: List }) => (
-        <TouchableOpacity onPress={() => setListDisplay(item.listId)}>
+        <TouchableOpacity onPress={() => {
+            setDisplayedList(item);
+        }}>
             {/*Add rendering for icons*/}
             {isSideBarVisible
                 ?
@@ -44,18 +46,22 @@ export default function Index() {
         </TouchableOpacity>
     )
 
+    const updateTasks = async () => {
+        const newTasks = await fetchTasks(displayedList.listId);
+        let areEqual = newTasks.length == displayTasks.length &&
+            newTasks.every((value) => {
+                const existingTask = displayTasks.find(task => task.taskId === value.taskId);
+                return existingTask && existingTask.taskBody === value.taskBody;
+            });
+        if (!areEqual) {
+            setDisplayTasks(newTasks);
+        }
+    }
+
     const updateList = async () => {
-        const newData = await fetchList();
-        let newListArray : List[] = [];
-        newData.forEach((value, key) => {
-            let tempList : List = {
-                listName: value,
-                listId: key,
-            }
-            newListArray.push(tempList);
-        })
+        const newListArray = await fetchList();
         let areEqual = newListArray.length == listContainer.length &&
-            newListArray.every((value, index) => {
+            newListArray.every((value) => {
                 const existingList = listContainer.find(list => list.listId === value.listId);
                 return existingList && existingList.listName === value.listName;
             });
@@ -68,8 +74,17 @@ export default function Index() {
 
     useEffect(() => {
         updateList();
+        const initList = listContainer.find(list => list.listId === 0);
+        if (initList){
+            setDisplayedList(initList);
+        }
+        updateTasks();
         const listInterval = setInterval(updateList, 5000)
-        return () => clearInterval(listInterval)
+        const taskInterval = setInterval(updateTasks, 5000)
+        return () => {
+            clearInterval(listInterval);
+            clearInterval(taskInterval);
+        }
     }, [])
 
 
@@ -146,7 +161,7 @@ export default function Index() {
                     <View style={{flex: 1}}>
                         <FlatList
                             data={listContainer}
-                            keyExtractor={(item) => item.id.toString()}
+                            keyExtractor={(item) => item.listId.toString()}
                             renderItem={({item}) => (
                                 renderList({item})
                             )}
@@ -157,7 +172,7 @@ export default function Index() {
 
                 </View>
                 <View style={{flex: 1}}>
-                    <ListScreen title={listDisplay.title}/>
+                    <ListScreen title={displayedList.listName}/>
                 </View>
             </View>
         </View>
