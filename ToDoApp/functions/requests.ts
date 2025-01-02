@@ -2,7 +2,7 @@ const BASEURL = "http://localhost:18080/lists";
 
 
 //this function returns the lists with their IDs as Key Value Pairs
-async function fetchList(): Promise<Map<Number, String>> {
+export async function fetchList(): Promise<Map<number, string>> {
     const response = await fetch(BASEURL,{
         method: "GET",
         headers: {
@@ -10,7 +10,7 @@ async function fetchList(): Promise<Map<Number, String>> {
         }
     });
     const data = await response.json();
-    const listMap = new Map<Number, String>;
+    const listMap = new Map<number, string>;
     for (const item of data) {
         listMap.set(item.listId, item.Name);
     }

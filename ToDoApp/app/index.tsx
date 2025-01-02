@@ -1,45 +1,40 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput} from "react-native";
 import ListScreen from "@/components/screens/ListScreen"
 import ArrowRight from "@/components/buttons/arrowRight";
 import ArrowLeft from "@/components/buttons/arrowLeft";
 import PlusIcon from "@/components/buttons/plusIcon";
 import Sample from "@/components/listIcons/sample";
-
-interface Task {
-    id: string;
-    name: string;
-}
+import {fetchList} from "@/functions/requests";
 
 
 interface List {
-    title: string;
-    id: number;
+    listName: string;
+    listId: number;
 }
 
 
 export default function Index() {
-    const initList: List = {id: 0, title: "TaskDump"};
-    const [listCounter, setListCounter] = useState<number>(1);
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
-    const [listContainer, setListContainer] = useState<List[]>([initList]);
-    const [listDisplay, setListDisplay] = useState<List>(initList);
+    const [listContainer, setListContainer] = useState<List[]>([]);
+    const [listDisplay, setListDisplay] = useState<number>(0); //initially fetches the Taskdump (id: 0)
 
     // Add a new list to the listContainer and increment the listCounter
     const addList = () => {
-        const newList: List = {id: listCounter, title: "New List",};
-        setListCounter(prevState => prevState + 1);
-        setListContainer((prevState) => [...prevState, newList]);
+        /**const newList: List = {id: listCounter, title: "New List",};
+         setListCounter(prevState => prevState + 1);
+         setListContainer((prevState) => [...prevState, newList]);
+         */
     }
 
     const renderList = ({item}: { item: List }) => (
-        <TouchableOpacity onPress={() => setListDisplay(item)}>
+        <TouchableOpacity onPress={() => setListDisplay(item.listId)}>
             {/*Add rendering for icons*/}
             {isSideBarVisible
                 ?
                 <View style={styles.listItemContainer}>
                     <Sample style={styles.icon}/>
-                    <Text style={styles.listItem}>{item.title}</Text>
+                    <Text style={styles.listItem}>{item.listName}</Text>
                 </View>
                 :
                 <View style={styles.listItemContainer}>
@@ -48,6 +43,34 @@ export default function Index() {
             }
         </TouchableOpacity>
     )
+
+    const updateList = async () => {
+        const newData = await fetchList();
+        let newListArray : List[] = [];
+        newData.forEach((value, key) => {
+            let tempList : List = {
+                listName: value,
+                listId: key,
+            }
+            newListArray.push(tempList);
+        })
+        let areEqual = newListArray.length == listContainer.length &&
+            newListArray.every((value, index) => {
+                const existingList = listContainer.find(list => list.listId === value.listId);
+                return existingList && existingList.listName === value.listName;
+            });
+        if (!areEqual) {
+            setListContainer(newListArray);
+        }
+    }
+
+
+
+    useEffect(() => {
+        updateList();
+        const listInterval = setInterval(updateList, 5000)
+        return () => clearInterval(listInterval)
+    }, [])
 
 
     return (
