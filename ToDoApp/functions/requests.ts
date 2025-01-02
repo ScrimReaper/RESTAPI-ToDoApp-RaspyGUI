@@ -26,7 +26,7 @@ export async function fetchList(): Promise<List[]> {
 
 //this function returns the tasks of a specific List in a map with their ids as keys
 export async function fetchTasks(listId : number):Promise<Task[]> {
-    const response = await fetch(BASEURL+ listId + "/tasks", {
+    const response = await fetch(BASEURL +"/" +  listId + "/tasks", {
         method: "GET",
         headers: {
             "API-KEY": "1234"
