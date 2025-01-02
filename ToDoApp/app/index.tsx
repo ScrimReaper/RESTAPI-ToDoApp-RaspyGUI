@@ -9,9 +9,6 @@ import {fetchList, fetchTasks} from "@/functions/requests";
 import {List, Task} from "@/app/types";
 
 
-
-
-
 export default function Index() {
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
     const [listContainer, setListContainer] = useState<List[]>([]);
@@ -71,11 +68,10 @@ export default function Index() {
     }
 
 
-
     useEffect(() => {
         updateList();
         const initList = listContainer.find(list => list.listId === 0);
-        if (initList){
+        if (initList) {
             setDisplayedList(initList);
         }
         updateTasks();
