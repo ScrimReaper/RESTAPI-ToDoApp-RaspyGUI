@@ -5,6 +5,7 @@
 #ifndef ROUTES_H
 #define ROUTES_H
 #include <crow/app.h>
+#include <crow/middlewares/cors.h>
 
 #include "../tasks/ListManager.h"
 #include "../constants/HttpStatus.h"
@@ -14,7 +15,7 @@
 class Routes {
 public:
     template<typename Middleware>
-    static void setUpRoutes(crow::App<Middleware> &app, ListManager &listManager) {
+    static void setUpRoutes(crow::App<Middleware, crow::CORSHandler> &app, ListManager &listManager) {
         CROW_ROUTE(app, "/")([]() {
             return "Hello World!";
         });

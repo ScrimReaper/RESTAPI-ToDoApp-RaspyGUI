@@ -1,4 +1,4 @@
-# Install script for directory: /home/mo/Documents/projects/1_project_ToDoApp/API
+# Install script for directory: /home/mo/Documents/Code/1_project_ToDoApp/API
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,7 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/mo/Documents/projects/1_project_ToDoApp/API/cmake-build-debug/_deps/crow-build/cmake_install.cmake")
+  include("/home/mo/Documents/Code/1_project_ToDoApp/API/cmake-build-debug/_deps/crow-build/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -62,6 +62,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "/home/mo/Documents/projects/1_project_ToDoApp/API/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "/home/mo/Documents/Code/1_project_ToDoApp/API/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

@@ -4,7 +4,7 @@ import requests
 
 def fetchContent() -> dict:
     response = requests.get(
-        url="http://localhost:18080/lists/0/tasks", 
+        url="http://localhost:18080/lists/0/tasks",
         headers={"API-KEY": "1234"}
     )
 
@@ -45,23 +45,23 @@ header_frame = tk.Frame(root, pady=10)
 header_frame.pack(fill=tk.X)
 
 header_label = tk.Label(
-    header_frame, 
-    text="Today's To-Do List", 
-    font=("Arial", 16, "bold"), 
+    header_frame,
+    text="Today's To-Do List",
+    font=("Arial", 16, "bold"),
 
 )
 header_label.pack()
 
 # Main Section with Listbox
-main_frame = tk.Frame(root,padx=10, pady=10)
+main_frame = tk.Frame(root, padx=10, pady=10)
 main_frame.pack(fill=tk.BOTH, expand=True)
 
 listbox = tk.Listbox(
-    main_frame, 
-    font=("Arial", 12), 
-    selectmode=tk.MULTIPLE, 
+    main_frame,
+    font=("Arial", 12),
+    selectmode=tk.MULTIPLE,
 
-    relief=tk.GROOVE, 
+    relief=tk.GROOVE,
     borderwidth=2
 )
 listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -71,19 +71,19 @@ footer_frame = tk.Frame(root, bg="lightgrey", pady=10)
 footer_frame.pack(fill=tk.X)
 
 reload_button = tk.Button(
-    footer_frame, 
-    text="Reload", 
-    font=("Arial", 12), 
-    relief=tk.RAISED, 
+    footer_frame,
+    text="Reload",
+    font=("Arial", 12),
+    relief=tk.RAISED,
     command=lambda: reloadContent(listboxInstnc=listbox, map=task_map)
 )
 reload_button.pack(side=tk.LEFT, padx=20)
 
 done_button = tk.Button(
-    footer_frame, 
-    text="Done", 
+    footer_frame,
+    text="Done",
     font=("Arial", 12),
-    relief=tk.RAISED, 
+    relief=tk.RAISED,
     command=lambda: removeItem(listboxInstnc=listbox, map=task_map)
 )
 done_button.pack(side=tk.RIGHT, padx=20)

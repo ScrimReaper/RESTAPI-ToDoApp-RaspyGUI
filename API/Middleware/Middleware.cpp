@@ -9,6 +9,12 @@
 #include "../constants/HttpStatus.h"
 
 void Middleware::before_handle( crow::request &req, crow::response &res,  context &context) const {
+
+    // Handle OPTIONS preflight requests
+    if (req.method == crow::HTTPMethod::OPTIONS) {
+        return; // Stop further processing for OPTIONS
+    }
+
     const auto apiReq = req.get_header_value("API-KEY");
 
     if (apiReq != API_KEY) {
