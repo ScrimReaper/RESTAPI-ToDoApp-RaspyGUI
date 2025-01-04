@@ -45,6 +45,7 @@ export default function Index() {
 
     const updateTasks = async () => {
         const newTasks = await fetchTasks(displayedList.listId);
+
         let areEqual = newTasks.length == displayTasks.length &&
             newTasks.every((value) => {
                 const existingTask = displayTasks.find(task => task.taskId === value.taskId);
@@ -157,7 +158,7 @@ export default function Index() {
                     <View style={{flex: 1}}>
                         <FlatList
                             data={listContainer}
-                            keyExtractor={(item) => item.listId.toString()}
+                            keyExtractor={item => item.listId.toString()}
                             renderItem={({item}) => (
                                 renderList({item})
                             )}

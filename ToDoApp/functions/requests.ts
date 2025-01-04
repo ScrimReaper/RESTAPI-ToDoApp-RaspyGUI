@@ -4,19 +4,19 @@ import {List, Task} from "@/app/types";
 
 //this function returns the lists with their IDs as Key Value Pairs
 export async function fetchList(): Promise<List[]> {
-    const response = await fetch(BASEURL,{
+    const response = await fetch(BASEURL, {
         method: "GET",
         headers: {
             "API-KEY": "1234"
         }
     });
     const data = await response.json();
-    const listArray : List[] = [];
-    let tempList : List;
+    const listArray: List[] = [];
+    let tempList: List;
     for (const item of data) {
         tempList = {
-            listName: item.listBody,
-            listId: item.lisId,
+            listId: item.listId,
+            listName: item.listName,
         }
         listArray.push(tempList);
     }
@@ -25,8 +25,8 @@ export async function fetchList(): Promise<List[]> {
 
 
 //this function returns the tasks of a specific List in a map with their ids as keys
-export async function fetchTasks(listId : number):Promise<Task[]> {
-    const response = await fetch(BASEURL +"/" +  listId + "/tasks", {
+export async function fetchTasks(listId: number): Promise<Task[]> {
+    const response = await fetch(BASEURL + "/" + listId + "/tasks", {
         method: "GET",
         headers: {
             "API-KEY": "1234"
@@ -34,8 +34,11 @@ export async function fetchTasks(listId : number):Promise<Task[]> {
     });
     const data = await response.json();
     const tasks = data.tasks;
+    if (!tasks) {
+        return [];
+    }
     const taskArray: Task[] = [];
-    let tempTask :Task;
+    let tempTask: Task;
     for (const item of tasks) {
         tempTask = {
             taskBody: item.taskBody,
