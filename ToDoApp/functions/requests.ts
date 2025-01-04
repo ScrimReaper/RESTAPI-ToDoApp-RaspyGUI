@@ -17,7 +17,7 @@ export async function fetchList(): Promise<List[]> {
 
     } catch (error) {
         console.error("There was an Error fetching the Lists", error);
-        return [];
+        return [{listName:"TaskDump", listId:0}];
     }
     const listArray: List[] = [];
     let tempList: List;
@@ -65,7 +65,7 @@ export async function fetchTasks(listId: number): Promise<Task[]> {
     return taskArray;
 }
 
-async function postList(listName: string) {
+export async function postList(listName: string) {
     try {
         const response = await fetch(BASEURL, {
             method: "POST",
@@ -83,7 +83,7 @@ async function postList(listName: string) {
 
 }
 
-async function postTask(listId: number, taskBody:string) {
+export async function postTask(listId: number, taskBody:string) {
     try {
         const response = await fetch(BASEURL + "/" + listId + "/tasks", {
             method: "POST",
@@ -99,9 +99,9 @@ async function postTask(listId: number, taskBody:string) {
     }
 }
 
-async function deleteTask(listId: number, taskId: number) {
+export async function deleteTask(listId: number, taskId: number) {
     try {
-        const response = await fetch(BASEURL + "/" + listId + "/tasks" + taskId, {
+        const response = await fetch(BASEURL + "/" + listId + "/tasks/" + taskId, {
             method: "DELETE",
             headers: {
                 "API-KEY": "1234"

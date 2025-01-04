@@ -9,6 +9,7 @@ import {fetchList, fetchTasks} from "@/functions/requests";
 import {List, Task} from "@/app/types";
 
 
+
 export default function Index() {
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
     const [listContainer, setListContainer] = useState<List[]>([]);
@@ -24,7 +25,7 @@ export default function Index() {
     }
 
 
-    const renderList = ({item}: { item: List }) => (
+    const renderLists = ({item}: { item: List }) => (
         <TouchableOpacity onPress={() => {
             setDisplayedList(item);
         }}>
@@ -145,7 +146,7 @@ export default function Index() {
                             data={listContainer}
                             keyExtractor={item => item.listId.toString()}
                             renderItem={({item}) => (
-                                renderList({item})
+                                renderLists({item})
                             )}
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
