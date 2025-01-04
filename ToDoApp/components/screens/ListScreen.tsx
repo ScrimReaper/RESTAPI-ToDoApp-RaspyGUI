@@ -9,7 +9,7 @@ import {
 import AddPopUp from "@/components/popUps/addPopUp";
 import DoneTick from "@/components/buttons/doneTick";
 import PlusIcon from "@/components/buttons/plusIcon";
-import {fetchTasks} from "@/functions/requests";
+import {fetchTasks, deleteTask} from "@/functions/requests";
 import {List, Task} from "@/app/types";
 
 
@@ -21,6 +21,7 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
     const [isAddModalVisible, setAddModalVisible] = useState<boolean>(false);
     const inputRef = useRef<TextInput | null>(null);
     const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
+    const [reRender, setReRender] = useState<boolean>(false);
 
     // Add a new task
     const addTask = () => {
@@ -46,23 +47,17 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
         }
     }
 
-    // Delete a task
-    const deleteTask = (taskId: number) => {
-        /*setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-
-         */
-    };
-    const handleEndEditing = (taskId: number, taskName: string) => {
-        if (taskName === "") {
-            deleteTask(taskId);
-        }
-    }
-
 
     // Render each task
     const renderItem = ({item}: { item: Task }) => (
         <View style={styles.taskItem}>
-            <TouchableOpacity onPress={() => deleteTask(item.taskId)}>
+            <TouchableOpacity onPress={async () => {
+                const wasSuccesful = await deleteTask(list.listId, item.taskId);
+                if (wasSuccesful) {
+
+                    setReRender(!reRender);
+                }
+            }}>
                 <DoneTick color="black" width={20} height={20}/>
             </TouchableOpacity>
 
@@ -82,7 +77,7 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
         return () => {
             clearInterval(updateInterval);
         };
-    }, [list])
+    }, [list,reRender]);
 
 
     return (
