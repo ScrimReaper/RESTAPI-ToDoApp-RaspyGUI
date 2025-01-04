@@ -12,8 +12,8 @@ import {List, Task} from "@/app/types";
 export default function Index() {
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
     const [listContainer, setListContainer] = useState<List[]>([]);
-    const [displayedList, setDisplayedList] = useState<List>({listName: "", listId: 0});
-    const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
+    const [displayedList, setDisplayedList] = useState<List>({listName:"TaskDump", listId:0});
+
 
     // Add a new list to the listContainer and increment the listCounter
     const addList = () => {
@@ -43,18 +43,6 @@ export default function Index() {
         </TouchableOpacity>
     )
 
-    const updateTasks = async () => {
-        const newTasks = await fetchTasks(displayedList.listId);
-
-        let areEqual = newTasks.length == displayTasks.length &&
-            newTasks.every((value) => {
-                const existingTask = displayTasks.find(task => task.taskId === value.taskId);
-                return existingTask && existingTask.taskBody === value.taskBody;
-            });
-        if (!areEqual) {
-            setDisplayTasks(newTasks);
-        }
-    }
 
     const updateList = async () => {
         const newListArray = await fetchList();
@@ -75,12 +63,9 @@ export default function Index() {
         if (initList) {
             setDisplayedList(initList);
         }
-        updateTasks();
         const listInterval = setInterval(updateList, 5000)
-        const taskInterval = setInterval(updateTasks, 5000)
         return () => {
-            clearInterval(listInterval);
-            clearInterval(taskInterval);
+            clearInterval(listInterval)
         }
     }, [])
 
@@ -169,7 +154,7 @@ export default function Index() {
 
                 </View>
                 <View style={{flex: 1}}>
-                    <ListScreen title={displayedList.listName}/>
+                        <ListScreen list={displayedList}/>
                 </View>
             </View>
         </View>
