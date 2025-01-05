@@ -1,16 +1,17 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {
     View,
-    Text,
     FlatList,
     TouchableOpacity,
-    StyleSheet, TextInput,
+    StyleSheet,
 } from "react-native";
-import AddPopUp from "@/components/popUps/addPopUp";
 import DoneTick from "@/components/buttons/doneTick";
 import PlusIcon from "@/components/buttons/plusIcon";
-import {fetchTasks, deleteTask} from "@/functions/requests";
+import {fetchTasks, deleteTask, postTask, putTask} from "@/functions/requests";
 import {List, Task} from "@/app/types";
+import {HStack} from "@/components/ui/hstack";
+import {Input, InputField} from "@/components/ui/input";
+import {Text} from "@/components/ui/text";
 
 
 interface ListScreenProps {
@@ -18,20 +19,18 @@ interface ListScreenProps {
 }
 
 const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
-    const [isAddModalVisible, setAddModalVisible] = useState<boolean>(false);
-    const inputRef = useRef<TextInput | null>(null);
     const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
     const [reRender, setReRender] = useState<boolean>(false);
+    const [editingId, setEditingId] = useState<number | undefined>(undefined);
+    const [inputVal, setInputVal] = useState("");
 
     // Add a new task
-    const addTask = () => {
-        /*const newTask = {id: taskIDCounter.toString(), name: ""};
-        setTasks((prevTasks) => [...prevTasks, newTask]);
-        setTaskIDCounter((prevID) => prevID + 1);
-
-        setTimeout(() => inputRef.current?.focus(), 100);
-
-         */
+    const addTask = async () => {
+        const response = await postTask(list.listId, "New Task");
+        if (response != null) {
+            setReRender(!reRender);
+            setEditingId(response);
+        }
     };
 
 
@@ -49,27 +48,58 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
 
 
     // Render each task
-    const renderItem = ({item}: { item: Task }) => (
-        <View style={styles.taskItem}>
-            <TouchableOpacity onPress={async () => {
-                const wasSuccesful = await deleteTask(list.listId, item.taskId);
-                if (wasSuccesful) {
+    const renderItem = ({item}: { item: Task }) => {
+        const handleCancelEditing = () => {
+            setEditingId(undefined);
+        }
+        const rmTask = async () => {
+            const wasSuccesful = await deleteTask(list.listId, item.taskId);
+            if (wasSuccesful) {
 
+                setReRender(!reRender);
+            }
+        }
+        const handleEndEditing = async () => {
+            setEditingId(undefined);
+            if (inputVal.trim() !== item.taskBody) {
+                const wasSuccesful = await putTask(list.listId, item.taskId, inputVal);
+                if (wasSuccesful) {
                     setReRender(!reRender);
                 }
-            }}>
-                <DoneTick color="black" width={20} height={20}/>
-            </TouchableOpacity>
+            }
+        }
+        const startEditing = () => {
+            setEditingId(item.taskId);
+        }
+        return (
+            <View style={{marginBottom:20, height: 40}}>
+            <HStack style={{alignItems: "center", flex: 1, paddingHorizontal: 10}}>
+                <TouchableOpacity onPress={rmTask}>
 
-            <TextInput
-                ref={inputRef}
-                style={styles.taskInput}
-                value={item.taskBody}
-                multiline={false}
-                returnKeyType="done"
-            />
-        </View>
-    );
+                    <DoneTick width={20} height={20}/>
+
+                </TouchableOpacity>
+                <View style={{marginLeft: 10, flex:1, marginRight:"3%"}}>
+                    {editingId == item.taskId ?
+                        <Input size="sm" style={{flex:1}} variant={"underlined"}>
+                            <InputField placeholder={item.taskBody} onChangeText={setInputVal}
+                                        onSubmitEditing={handleEndEditing} onBlur={handleCancelEditing}/>
+                        </Input>
+                        :
+                        <TouchableOpacity onPress={startEditing}>
+                            <Text size={"md"}>
+                                {item.taskBody}
+                            </Text>
+                        </TouchableOpacity>
+                    }
+
+                </View>
+
+            </HStack>
+            </View>
+        )
+    }
+
 
     useEffect(() => {
         updateTasks();
@@ -77,7 +107,7 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
         return () => {
             clearInterval(updateInterval);
         };
-    }, [list,reRender]);
+    }, [list, reRender]);
 
 
     return (
@@ -87,8 +117,6 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
                 <Text style={styles.title}>{list.listName}</Text>
             </View>
 
-            {/* AddPopUp */}
-            <AddPopUp visible={isAddModalVisible} onClose={() => setAddModalVisible(false)}/>
 
             {/* Task List */}
             <FlatList

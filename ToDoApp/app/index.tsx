@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import ListScreen from "@/components/screens/ListScreen"
-import {deleteList, deleteTask, fetchList, fetchTasks, putList} from "@/functions/requests";
-import {List, Task} from "@/app/types";
+import {deleteList, fetchList, postList, putList} from "@/functions/requests";
+import {List} from "@/app/types";
 import {Text} from "@/components/ui/text"
 import {Drawer, DrawerBackdrop, DrawerBody, DrawerContent, DrawerHeader} from "@/components/ui/drawer";
 import {Heading} from "@/components/ui/heading";
@@ -12,6 +12,7 @@ import {HStack} from "@/components/ui/hstack";
 import {Menu, MenuItem, MenuItemLabel} from "@/components/ui/menu";
 import {Button, ButtonIcon} from "@/components/ui/button";
 import {Input, InputField} from "@/components/ui/input";
+import PlusIcon from "@/components/buttons/plusIcon";
 
 
 export default function Index() {
@@ -19,21 +20,12 @@ export default function Index() {
     const [listContainer, setListContainer] = useState<List[]>([]);
     const [displayedList, setDisplayedList] = useState<List>({listName: "TaskDump", listId: 0});
     const [reRender, setReRender] = useState<boolean>(false);
-    const [editingId, setEditingId] = useState<number|undefined>(undefined);
+    const [editingId, setEditingId] = useState<number | undefined>(undefined);
     const [inputVal, setInputVal] = useState<string>("");
 
 
-    // Add a new list to the listContainer and increment the listCounter
-    const addList = () => {
-        /**const newList: List = {id: listCounter, title: "New List",};
-         setListCounter(prevState => prevState + 1);
-         setListContainer((prevState) => [...prevState, newList]);
-         */
-    }
-
-
     const renderLists = ({item}: { item: List }) => {
-        const handleCancelEdit = ()=> {
+        const handleCancelEdit = () => {
             setEditingId(undefined);
         }
         const handleEndEditing = async () => {
@@ -46,6 +38,13 @@ export default function Index() {
                 }
             }
         };
+
+        const rmList = async () => {
+            const wasSuccesful = await deleteList(item.listId);
+            if (wasSuccesful) {
+                setReRender(!reRender);
+            }
+        }
         return (
             <HStack style={{justifyContent: "space-between", alignItems: "center", flex: 1, paddingHorizontal: 10}}>
                 <TouchableOpacity onPress={() => {
@@ -53,15 +52,16 @@ export default function Index() {
                 }}>
                     <HStack style={{alignItems: "center"}} space="sm">
                         <Icon as={StarIcon}/>
-                        {editingId == item.listId?
+                        {editingId == item.listId ?
 
 
-                            <Input size="sm">
-                                <InputField placeholder={item.listName} onChangeText={setInputVal} onSubmitEditing={handleEndEditing} onBlur={handleCancelEdit}/>
+                            <Input size="sm" style={{width: "60%"}} variant={"underlined"}>
+                                <InputField placeholder={item.listName} onChangeText={setInputVal}
+                                            onSubmitEditing={handleEndEditing} onBlur={handleCancelEdit}/>
 
                             </Input>
                             :
-                            <Text size={"lg"}>{item.listName}</Text>
+                            <Text size={"md"}>{item.listName}</Text>
                         }
                     </HStack>
                 </TouchableOpacity>
@@ -76,12 +76,7 @@ export default function Index() {
                       }}
                       style={styles.menuItemMenu}
                 >
-                    <MenuItem closeOnSelect={true} onPress={async () => {
-                        const wasSuccesful = await deleteList(item.listId);
-                        if (wasSuccesful) {
-                            setReRender(!reRender);
-                        }
-                    }} style={styles.menuItem}>
+                    <MenuItem closeOnSelect={true} onPress={rmList} style={styles.menuItem}>
                         <Icon as={TrashIcon}/>
                         <MenuItemLabel size={"sm"} style={styles.menuItemLabel}>
                             Delete
@@ -116,6 +111,13 @@ export default function Index() {
         }
     }
 
+    const addList = async () => {
+        const response = await postList("New List");
+        if (response != null) {
+            setReRender(!reRender);
+            setEditingId(response);
+        }
+    };
 
     useEffect(() => {
         updateList();
@@ -148,7 +150,10 @@ export default function Index() {
                 {/* SideBar*/}
                 <Box>
                     <Drawer isOpen={isSideBarVisible}
-                            onClose={() => setSideBarVisible(false)}
+                            onClose={() => {
+                                setSideBarVisible(false);
+                                setEditingId(undefined);
+                            }}
                             size="sm"
                             anchor="left">
                         <DrawerBackdrop/>
@@ -157,6 +162,9 @@ export default function Index() {
                                 <Heading size="lg">
                                     Lists
                                 </Heading>
+                                <Button size={"xs"} variant="link" style={{width: "10%"}} onPress={addList}>
+                                    <ButtonIcon as={PlusIcon}/>
+                                </Button>
                             </DrawerHeader>
                             <DrawerBody>
 
