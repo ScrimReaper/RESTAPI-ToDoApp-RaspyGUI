@@ -7,6 +7,8 @@ import {
     StyleSheet, TextInput,
 } from "react-native";
 import AddPopUp from "@/components/popUps/addPopUp";
+import DoneTick from "@/components/buttons/doneTick";
+import PlusIcon from "@/components/buttons/plusIcon";
 import {fetchTasks, deleteTask} from "@/functions/requests";
 import {List, Task} from "@/app/types";
 
@@ -56,6 +58,7 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
                     setReRender(!reRender);
                 }
             }}>
+                <DoneTick color="black" width={20} height={20}/>
             </TouchableOpacity>
 
             <TextInput
@@ -99,6 +102,7 @@ const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
             {/* Bottom Bar */}
             <View style={styles.bttmBar}>
                 <TouchableOpacity onPress={addTask} style={styles.addButton}>
+                    <PlusIcon color="purple"/>
                 </TouchableOpacity>
                 <Text style={{marginLeft: 20, fontSize: 15, color: "purple"}}>
                     Add Tasks
