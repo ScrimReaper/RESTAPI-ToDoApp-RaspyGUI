@@ -68,7 +68,7 @@ public:
             const bool successfull = listManager.deleteList(id);
 
             if (!successfull) {
-                return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+                return crow::response(HttpStatus::NOTFOUND, "Invalid ID or trying to delete the TaskDump");
             }
 
             return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
