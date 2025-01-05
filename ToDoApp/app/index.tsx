@@ -7,13 +7,17 @@ import PlusIcon from "@/components/buttons/plusIcon";
 import Sample from "@/components/listIcons/sample";
 import {fetchList, fetchTasks} from "@/functions/requests";
 import {List, Task} from "@/app/types";
-
+import {Drawer, DrawerBackdrop, DrawerBody, DrawerContent, DrawerHeader} from "@/components/ui/drawer";
+import {Heading} from "@/components/ui/heading";
+import {Icon, MenuIcon} from "@/components/ui/icon";
+import {Box} from "@/components/ui/box";
+import {HStack} from "@/components/ui/hstack";
 
 
 export default function Index() {
-    const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
+    const [isSideBarVisible, setSideBarVisible] = useState<boolean>(true);
     const [listContainer, setListContainer] = useState<List[]>([]);
-    const [displayedList, setDisplayedList] = useState<List>({listName:"TaskDump", listId:0});
+    const [displayedList, setDisplayedList] = useState<List>({listName: "TaskDump", listId: 0});
 
 
     // Add a new list to the listContainer and increment the listCounter
@@ -72,92 +76,57 @@ export default function Index() {
 
 
     return (
-
         <View style={{flex: 1, backgroundColor: "white"}}>
-            {/* TopBar*/}
-            <View style={styles.topBar}>
-            </View>
 
-            {/* Main Content*/}
-            <View style={{flexDirection: "row", flex: 1}}>
+
+            <HStack style={{flex: 1}}>
+                <Box style={styles.topBar}>
+                    <TouchableOpacity onPress={() => {
+                        setSideBarVisible(true)
+                    }}>
+                        <Icon as={MenuIcon} size="xl"/>
+                    </TouchableOpacity>
+
+                </Box>
+
 
                 {/* SideBar*/}
-                <View style={{
-                    width: isSideBarVisible ? 200 : 60,
-                    borderRightWidth: 1,
-                    borderColor: "grey",
-                    position: "relative"
-                }}>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between", // Space between the PlusIcon (if visible) and Arrow
-                            padding: 10,
-                        }}
-                    >
-                        {/* PlusIcon only when the sidebar is visible */}
-                        {isSideBarVisible && (
-                            <TouchableOpacity onPress={addList}>
-                                <PlusIcon color="grey " height={40} width={40}/>
-                            </TouchableOpacity>
-                        )}
+                <Box>
+                    <Drawer isOpen={isSideBarVisible}
+                            onClose={() => setSideBarVisible(false)}
+                            size="md"
+                            anchor="left">
+                        <DrawerBackdrop/>
+                        <DrawerContent>
+                            <DrawerHeader>
+                                <Heading size="lg">
+                                    Lists
+                                </Heading>
+                            </DrawerHeader>
+                            <DrawerBody>
 
-                        {/* ArrowLeft or ArrowRight */}
-                        {isSideBarVisible ? (
-                            <TouchableOpacity
-                                onPress={() => setSideBarVisible(!isSideBarVisible)}
-                                style={{
-                                    position: "absolute", // Keep absolute positioning for ArrowLeft
-                                    right: 10, // Adjust to your needs
-                                    top: 10,
-                                }}
-                            >
-                                <ArrowLeft
-                                    style={{
-                                        color: "black",
-                                        width: 40,
-                                        height: 40,
-                                    }}
+                                <FlatList
+                                    data={listContainer}
+                                    keyExtractor={item => item.listId.toString()}
+                                    renderItem={({item}) => (
+                                        renderLists({item})
+                                    )}
+                                    showsVerticalScrollIndicator={false}
+                                    showsHorizontalScrollIndicator={false}
                                 />
-                            </TouchableOpacity>
-                        ) : (
-                            <TouchableOpacity
-                                onPress={() => setSideBarVisible(!isSideBarVisible)}
-                                style={{
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    flex: 1, // Keep center alignment for ArrowRight
-                                }}
-                            >
-                                <ArrowRight
-                                    style={{
-                                        color: "black",
-                                        width: 40,
-                                        height: 40,
-                                    }}
-                                />
-                            </TouchableOpacity>
-                        )}
-                    </View>
+                            </DrawerBody>
+                        </DrawerContent>
+                    </Drawer>
+
+
                     {/* ListContainer*/}
-                    <View style={{flex: 1}}>
-                        <FlatList
-                            data={listContainer}
-                            keyExtractor={item => item.listId.toString()}
-                            renderItem={({item}) => (
-                                renderLists({item})
-                            )}
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}
-                        />
-                    </View>
 
-                </View>
-                <View style={{flex: 1}}>
-                        <ListScreen list={displayedList}/>
-                </View>
-            </View>
+
+                </Box>
+                <Box style={{flex: 1}}>
+                    <ListScreen list={displayedList}/>
+                </Box>
+            </HStack>
         </View>
 
     )
@@ -166,40 +135,51 @@ export default function Index() {
 
 const styles = StyleSheet.create({
     topBar: {
+        width: "5%",
         height: 60,
-        backgroundColor: 'white', // Header background color
-        flexDirection: 'row',       // Row layout for title and button
-        alignItems: 'center',       // Center items vertically
-        paddingHorizontal: 15,
-        justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        borderColor: 'grey',
-        marginLeft: 5,
-        marginRight: 5,
-    },
+        backgroundColor:
+            'white', // Header background color
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
+    ,
     listItem: {
         fontSize: 20,
-        color: "black", // Add consistent text color
-        marginLeft: 10, // Add padding for spacing
-    },
+        color:
+            "black", // Add consistent text color
+        marginLeft:
+            10, // Add padding for spacing
+    }
+    ,
     listItemContainer: {
         flexDirection: "row",
-        alignItems: "center", // Ensures consistent spacing
-        padding: 10, // Add padding for spacing
-        // Consistent bottom border
-        borderColor: "grey",
-    },
+        alignItems:
+            "center", // Ensures consistent spacing
+        padding:
+            10, // Add padding for spacing
+                // Consistent bottom border
+        borderColor:
+            "grey",
+    }
+    ,
     icon: {
         color: 'black',
-        width: 30,
-        height: 30,
-        marginRight: 10, // Space between icon and text
-    },
+        width:
+            30,
+        height:
+            30,
+        marginRight:
+            10, // Space between icon and text
+    }
+    ,
     menuButton: {
         color: 'black',
-        width: 50,
-        height: 50,
-    },
+        width:
+            50,
+        height:
+            50,
+    }
+    ,
 });
 
 
