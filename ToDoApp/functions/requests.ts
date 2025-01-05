@@ -115,5 +115,35 @@ export async function deleteTask(listId: number, taskId: number) {
 
 }
 
+export async function deleteList(listID:number) {
+    try {
+        const response = await fetch(BASEURL + "/" + listID, {
+            method: "DELETE",
+            headers: {
+                "API-KEY": "1234"
+            }
+        })
+        return response.status === 204;
+    }catch (error) {
+        console.error("There was an Error deleteing the list" + error);
+        return false;
+    }
+}
+
+export async function putList(listId:number, listName:string) {
+    try {
+        const response = await fetch(BASEURL + "/" + listId,  {
+            method: "PUT",
+            headers: {
+                "API-KEY": "1234"
+            },
+            body: JSON.stringify({listName: listName})
+        })
+        return response.ok;
+    } catch (error){
+        console.error("There was an Error puting the list" + error);
+        return false;
+    }
+}
 
 

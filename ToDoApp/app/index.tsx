@@ -1,23 +1,26 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity} from "react-native";
+import {View, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import ListScreen from "@/components/screens/ListScreen"
-import ArrowRight from "@/components/buttons/arrowRight";
-import ArrowLeft from "@/components/buttons/arrowLeft";
-import PlusIcon from "@/components/buttons/plusIcon";
-import Sample from "@/components/listIcons/sample";
-import {fetchList, fetchTasks} from "@/functions/requests";
+import {deleteList, deleteTask, fetchList, fetchTasks, putList} from "@/functions/requests";
 import {List, Task} from "@/app/types";
+import {Text} from "@/components/ui/text"
 import {Drawer, DrawerBackdrop, DrawerBody, DrawerContent, DrawerHeader} from "@/components/ui/drawer";
 import {Heading} from "@/components/ui/heading";
-import {Icon, MenuIcon} from "@/components/ui/icon";
+import {EditIcon, Icon, MenuIcon, StarIcon, ThreeDotsIcon, TrashIcon} from "@/components/ui/icon";
 import {Box} from "@/components/ui/box";
 import {HStack} from "@/components/ui/hstack";
+import {Menu, MenuItem, MenuItemLabel} from "@/components/ui/menu";
+import {Button, ButtonIcon} from "@/components/ui/button";
+import {Input, InputField} from "@/components/ui/input";
 
 
 export default function Index() {
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(true);
     const [listContainer, setListContainer] = useState<List[]>([]);
     const [displayedList, setDisplayedList] = useState<List>({listName: "TaskDump", listId: 0});
+    const [reRender, setReRender] = useState<boolean>(false);
+    const [editingId, setEditingId] = useState<number|undefined>(undefined);
+    const [inputVal, setInputVal] = useState<string>("");
 
 
     // Add a new list to the listContainer and increment the listCounter
@@ -29,24 +32,76 @@ export default function Index() {
     }
 
 
-    const renderLists = ({item}: { item: List }) => (
-        <TouchableOpacity onPress={() => {
-            setDisplayedList(item);
-        }}>
-            {/*Add rendering for icons*/}
-            {isSideBarVisible
-                ?
-                <View style={styles.listItemContainer}>
-                    <Sample style={styles.icon}/>
-                    <Text style={styles.listItem}>{item.listName}</Text>
-                </View>
-                :
-                <View style={styles.listItemContainer}>
-                    <Sample style={styles.icon}/>
-                </View>
+    const renderLists = ({item}: { item: List }) => {
+        const handleCancelEdit = ()=> {
+            setEditingId(undefined);
+        }
+        const handleEndEditing = async () => {
+            setEditingId(undefined); // Exit editing mode
+            if (inputVal.trim() !== item.listName) {
+                // Only update if the name has changed
+                const wasSuccessful = await putList(item.listId, inputVal);
+                if (wasSuccessful) {
+                    setReRender(!reRender); // Re-render the list
+                }
             }
-        </TouchableOpacity>
-    )
+        };
+        return (
+            <HStack style={{justifyContent: "space-between", alignItems: "center", flex: 1, paddingHorizontal: 10}}>
+                <TouchableOpacity onPress={() => {
+                    setDisplayedList(item);
+                }}>
+                    <HStack style={{alignItems: "center"}} space="sm">
+                        <Icon as={StarIcon}/>
+                        {editingId == item.listId?
+
+
+                            <Input size="sm">
+                                <InputField placeholder={item.listName} onChangeText={setInputVal} onSubmitEditing={handleEndEditing} onBlur={handleCancelEdit}/>
+
+                            </Input>
+                            :
+                            <Text size={"lg"}>{item.listName}</Text>
+                        }
+                    </HStack>
+                </TouchableOpacity>
+                <Menu placement="bottom right"
+                      trigger={({...triggerProps}) => {
+                          return (
+                              <Button {...triggerProps} size="sm" variant="link"
+                                      style={{transform: [{rotate: '90deg'}]}}>
+                                  <ButtonIcon as={ThreeDotsIcon}/>
+                              </Button>
+                          )
+                      }}
+                      style={styles.menuItemMenu}
+                >
+                    <MenuItem closeOnSelect={true} onPress={async () => {
+                        const wasSuccesful = await deleteList(item.listId);
+                        if (wasSuccesful) {
+                            setReRender(!reRender);
+                        }
+                    }} style={styles.menuItem}>
+                        <Icon as={TrashIcon}/>
+                        <MenuItemLabel size={"sm"} style={styles.menuItemLabel}>
+                            Delete
+                        </MenuItemLabel>
+                    </MenuItem>
+                    <MenuItem closeOnSelect={true} style={styles.menuItem} onPress={() => {
+                        setEditingId(item.listId);
+                    }}>
+                        <Icon as={EditIcon}/>
+                        <MenuItemLabel size={"sm"} style={styles.menuItemLabel}>
+                            Rename
+                        </MenuItemLabel>
+                    </MenuItem>
+
+
+                </Menu>
+            </HStack>
+
+        )
+    }
 
 
     const updateList = async () => {
@@ -72,7 +127,7 @@ export default function Index() {
         return () => {
             clearInterval(listInterval)
         }
-    }, [])
+    }, [reRender])
 
 
     return (
@@ -94,7 +149,7 @@ export default function Index() {
                 <Box>
                     <Drawer isOpen={isSideBarVisible}
                             onClose={() => setSideBarVisible(false)}
-                            size="md"
+                            size="sm"
                             anchor="left">
                         <DrawerBackdrop/>
                         <DrawerContent>
@@ -134,6 +189,19 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+    menuItemLabel: {
+        flex: 1,
+        textAlign: 'left',
+        marginLeft: 10
+    },
+    menuItem: {
+        flexDirection: 'row',
+        justifyContent: "space-between",
+        alignItems: 'center',           // Centers the items vertically
+        paddingVertical: 8,             // Adds spacing above and below
+        paddingHorizontal: 16,          // Adds spacing on the sides
+        borderRadius: 8,
+    },
     topBar: {
         width: "5%",
         height: 60,
@@ -141,6 +209,9 @@ const styles = StyleSheet.create({
             'white', // Header background color
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    menuItemMenu: {
+        right: 10,
     }
     ,
     listItem: {
