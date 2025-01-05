@@ -74,10 +74,12 @@ export async function postList(listName: string) {
             },
             body: JSON.stringify({listName: listName}),
         });
-        return response.status === 201 //if req was created return true
+        const data = await response.json();
+
+        return response.status === 201 ? data.listId : null;
     } catch (e) {
         console.error("There was an Error posting the list" + e);
-        return false;
+        return null;
     }
 
 
@@ -92,10 +94,11 @@ export async function postTask(listId: number, taskBody:string) {
             },
             body: JSON.stringify({taskBody: taskBody}),
         })
-        return response.status === 201
+        const task = await response.json();
+        return response.status === 201 ? task.taskId : null;
     } catch (error) {
         console.error("There was an Error posting the task", error);
-        return false;
+        return null
     }
 }
 
@@ -142,6 +145,23 @@ export async function putList(listId:number, listName:string) {
         return response.ok;
     } catch (error){
         console.error("There was an Error puting the list" + error);
+        return false;
+    }
+}
+
+
+export async function putTask(listId:number, taskId:number, taskBody:string) {
+    try {
+        const response = await fetch(BASEURL + "/" + listId + "/tasks/"+taskId , {
+            method: "PUT",
+            headers: {
+                "API-KEY": "1234"
+            },
+            body: JSON.stringify({taskBody: taskBody}),
+        })
+        return response.ok;
+    } catch (error){
+        console.error("There was an Error puting the task" + error);
         return false;
     }
 }
