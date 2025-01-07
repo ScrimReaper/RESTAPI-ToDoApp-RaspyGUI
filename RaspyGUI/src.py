@@ -9,6 +9,7 @@ def fetchContent() -> dict:
         headers={"API-KEY": "1234"}
         )
     except:
+        print(f"Failed to fetch Content. Connection to API couldnt be established")
         return {}
 
 
@@ -35,6 +36,7 @@ def removeItem(listboxInstnc: tk.Listbox, map: dict):
             response = requests.delete(url=reqUrl, headers={"API-KEY": "1234"})
         except:
             print(f"Failed to delete task with ID: {trueID}. Connection to API couldn't be established")
+            return
         if response.status_code == 204:
             print(f"Deleted task with ID: {trueID}")
             listboxInstnc.delete(i)
