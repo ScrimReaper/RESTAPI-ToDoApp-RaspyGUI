@@ -3,10 +3,14 @@ import requests
 
 
 def fetchContent() -> dict:
-    response = requests.get(
+    try:
+        response = requests.get(
         url="http://localhost:18080/lists/0/tasks",
         headers={"API-KEY": "1234"}
-    )
+        )
+    except:
+        return {}
+
 
     data = response.json()
     tasks = data["tasks"]
@@ -27,7 +31,10 @@ def removeItem(listboxInstnc: tk.Listbox, map: dict):
     for i in listboxInstnc.curselection():
         trueID = map[i]
         reqUrl = f"http://localhost:18080/lists/0/tasks/{trueID}"
-        response = requests.delete(url=reqUrl, headers={"API-KEY": "1234"})
+        try:
+            response = requests.delete(url=reqUrl, headers={"API-KEY": "1234"})
+        except:
+            print(f"Failed to delete task with ID: {trueID}. Connection to API couldn't be established")
         if response.status_code == 204:
             print(f"Deleted task with ID: {trueID}")
             listboxInstnc.delete(i)
