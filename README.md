@@ -51,7 +51,8 @@ The **ToDoApp** is a project designed to challenge my skills by diving into tool
 
 ## Acknowledgements
 
-This project has been a wild ride and a huge milestone in my learning journey. It taught me that I really need more structure in my chaos. Coding without a plan? Yeah, turns out it’s not a great idea (who knew?). Let’s just say I restarted this project more times than I’d like to admit, but those restarts were part of the journey. It’s been frustrating, fun, and full of lessons that will definitely shape how I tackle future projects. Here’s to more plans and fewer facepalms next time!
+This project has been a wild ride and a huge milestone in my learning journey, taught me that I really need more structure in my chaos. Turns out coding without thinking it thru is not the best approach (who knew?). Let’s just say I restarted this project more times than I’d like to admit, but I think that was crucial for my
+learning. Although C++ is probably the most unpopular choice for a quick REST API, I am so happy that i chose it, really changed my understanding for programming languages, compilers, etc. as a whole. It’s been frustrating, fun, and full of lessons that will definitely shape how I tackle future projects. To more plans and fewer facepalms next time!
 
 ---
 
