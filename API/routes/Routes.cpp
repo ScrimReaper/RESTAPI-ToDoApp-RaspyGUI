@@ -149,4 +149,28 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
                               "Deleted task with id: " + std::to_string(taskId) + " from list wit id: " +
                               std::to_string(listId));
     });
+
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("PUT"_method)(
+        [&listManager](const crow::request &req, int listId, int taskId) {
+            auto json = crow::json::load(req.body);
+
+            if (!JsonF::util::validateTaskJson(json)) {
+                return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+            }
+
+
+            std::string newTaskBody = json[JsonF::task::TASKBODY].s();
+            bool successfull = listManager.putTask(listId, taskId, newTaskBody);
+
+
+            if (!successfull) {
+                return crow::response(HttpStatus::NOTFOUND, "Invalid ID, Task does not exist");
+            }
+
+            crow::json::wvalue returnVal;
+            returnVal[JsonF::task::ID] = taskId;
+            returnVal[JsonF::task::TASKBODY] = newTaskBody;
+
+            return crow::response(HttpStatus::OK, returnVal);
+        });
 }
