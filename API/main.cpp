@@ -175,6 +175,26 @@ int main() {
         return crow::response(200, out);
     });
 
+    /**
+     * @brief Adds tasks to a specific list.
+     *
+     * This method handles a POST request to add multiple tasks to a list identified
+     * by its ID. The tasks are provided as an array in the JSON body. Each task must
+     * include the fields 'name' (string), 'done' (boolean), and 'id' (integer).
+     *
+     * @param req The HTTP request object containing the JSON payload.
+     *            The payload must include an array under the key "tasks".
+     * @param id The ID of the list to which the tasks should be added.
+     * @return A crow::response object with the following:
+     *         - 201 CREATED: Returns the updated list, including the added tasks.
+     *         - 404 NOT FOUND: If the list with the given ID does not exist.
+     *         - 400 BAD REQUEST: If the JSON body is invalid or required fields are missing/incorrect.
+     *
+     * @throws std::exception if the JSON parsing fails or invalid data types are encountered.
+     *
+     * @note This method validates each task's fields and type safety. If any task fails validation,
+     *       the process stops, and an error is returned.
+     */
     CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([](const crow::request &req, int id) {
         auto json = crow::json::load(req.body);
 
@@ -244,6 +264,21 @@ int main() {
         return crow::response(CREATED, result);
     });
 
+    /**
+     * @brief Deletes a specific task from a list.
+     *
+     * This method handles a DELETE request to remove a task from a list identified
+     * by its ID. The task is specified by its unique `task_id`.
+     *
+     * @param list_id The ID of the list containing the task to delete.
+     * @param task_id The ID of the task to be removed from the list.
+     * @return A crow::response object with the following:
+     *         - 204 NO CONTENT: If the task is successfully deleted.
+     *         - 404 NOT FOUND: If the list or task does not exist.
+     *
+     * @note The task is removed from the list in-place. If no task matches the given
+     *       `task_id`, the method returns a 404 response.
+     */
     CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([](int list_id, int task_id) {
         //check if the list exists
         if (!lists.contains(list_id)) {
