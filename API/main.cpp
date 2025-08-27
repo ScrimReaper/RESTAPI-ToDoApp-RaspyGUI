@@ -79,4 +79,38 @@ int main() {
         // Return no content response
         return crow::response(204, "Deleted list with id: " + std::to_string(id));
     });
+
+    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([](const crow::request& req, crow::response& res, int id){
+        // Check if the list exists
+        if (!lists.contains(id)) {
+            res.code = 404;
+            res.body = "List not found.";
+            res.end();
+            return;
+        }
+
+        // Load the JSON from the request
+        auto json = crow::json::load(req.body);
+        if (!json || !json.has("name")) {
+            res.code = 400;
+            res.body = "Invalid JSON.";
+            res.end();
+            return;
+        }
+
+        // Update the list
+        List& list = lists[id];
+        list.name = json["name"].s();
+
+        // Return the updated list
+        crow::json::wvalue result;
+        result["id"] = list.id;
+        result["name"] = list.name;
+        res.code = 200;
+        res.body = result.dump();
+        res.end();
+
+    });
+    app.port(18080).run();
+
 }
