@@ -179,27 +179,49 @@ int main() {
         auto json = crow::json::load(req.body);
 
         //if there is no id to assign the tasks to they cant be posted
-        if (!json || !json.has("tasks")) {
-            return crow::response(400);
+        if (!json || !json.has(TASKS_FIELD)) {
+            return crow::response(BADREQUEST, "Invalid or missing JSON Body");
         }
 
         //check if the id exists
-
         if (!lists.contains(id)) {
-            return crow::response(404, "List not found.");
+            return crow::response(NOTFOUND, "List not found.");
         }
 
-        //TODO fix the fore loop, its not compiling
-        std::vector<crow::json::rvalue> tasks = json["tasks"].lo();
+        //check if the tasks are valid and the type is correct
+        std::vector<crow::json::rvalue> tasks;
+        try {
+            tasks = json[TASKS_FIELD].lo();
+        } catch (const std::exception &e) {
+            return crow::response(BADREQUEST, "Invalid Type for 'tasks'. Must be an array.");
+        }
 
         //add all the tasks to the list
         List &addTo = lists[id];
 
         for (auto &task: tasks) {
             Task v;
-            v.id = task["id"].i();
-            v.name = task["name"].s();
-            v.done = task["done"].b();
+            //check if the task is valid
+            if (!validateTaskJson(task)) {
+                return crow::response(BADREQUEST, "Missing required fields: 'name' and/or 'done' and/or 'id'.");
+            }
+
+            //cjheck if the fields are of the correct type
+            std::string task_name;
+            bool done_temp;
+            int id_temp;
+            try {
+                task_name = task[NAME_FIELD].s();
+                done_temp = task[DONE_FIELD].b();
+                id_temp = task[ID_FIELD].i();
+            } catch (const std::exception &e) {
+                return crow::response(BADREQUEST, "Invalid type for 'done': must be a boolean or 'name': must be a string.");
+            }
+
+            //add the task to the list
+            v.done = done_temp;
+            v.name = task_name;
+            v.id = id_temp;
 
             addTo.tasks.push_back(std::move(v));
         }
@@ -207,17 +229,20 @@ int main() {
         //return the new results
 
         crow::json::wvalue result;
-        result["id"] = addTo.id;
-        result["name"] = addTo.name;
+        result[ID_FIELD] = addTo.id;
+        result[NAME_FIELD] = addTo.name;
         crow::json::wvalue::list task_list;
         for (Task &task: addTo.tasks) {
             crow::json::wvalue task_json;
-            task_json["id"] = task.id;
-            task_json["name"] = task.name;
-            task_json["done"] = task.done;
+            task_json[ID_FIELD] = task.id;
+            task_json[NAME_FIELD] = task.name;
+            task_json[DONE_FIELD] = task.done;
             task_list.push_back(std::move(task_json));
         }
-        result["tasks"] = std::move(task_list);
+        result[TASKS_FIELD] = std::move(task_list);
+
+        return crow::response(CREATED, result);
+    });
 
         return crow::response(201, result);
     });
