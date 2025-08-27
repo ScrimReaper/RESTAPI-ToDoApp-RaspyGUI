@@ -66,6 +66,31 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
     });
+
+    /*
+     * This Method changes the name of a List and returns the new Listname and its id
+     */
+    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([&listManager](const crow::request &req, int id) {
+        const auto json = crow::json::load(req.body);
+
+        if (!JsonF::util::validateListJson(json)) {
+            return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+        }
+
+        std::string newName = json[JsonF::list::NAME].s();
+        bool successfull = listManager.putList(id, newName);
+
+        if (!successfull) {
+            return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+        }
+
+        crow::json::wvalue returnVal;
+
+        returnVal[JsonF::list::ID] = id;
+        returnVal[JsonF::list::NAME] = std::move(newName);
+
+        return crow::response(HttpStatus::OK, returnVal);
+    });
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 }
