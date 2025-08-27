@@ -264,7 +264,71 @@ int main() {
         return crow::response(404, "Task not found.");
     });
 
+    /**
+    * @brief Updates a specific task in a list.
+    *
+     * This method handles a PUT request to update the details of a specific task
+     * within a given list. It validates the input JSON, checks for the existence
+     * of the list and task, and updates the task's details if all validations pass.
+     *
+     * @param req The HTTP request object containing the JSON payload.
+     *            The payload must include the fields "name" (string) and "done" (boolean).
+     * @param list_id The ID of the list containing the task to update.
+     * @param task_id The ID of the task to update.
+     * @return A crow::response object with the following:
+     *         - 200 OK if the task is successfully updated.
+     *         - 404 NOT FOUND if the list or task is not found.
+     *         - 400 BAD REQUEST if the JSON is invalid or required fields are missing.
+     *
+     * @throws std::exception if there is an error parsing the JSON payload.
+     *
+     * @note This method expects the JSON payload to be well-formed. If invalid types
+     *       are provided for the fields, an error response is returned.
+     */
+    CROW_ROUTE(app, "/list<int>/tasks/<int>").methods("PUT"_method)(
+        [](const crow::request &req, int list_id, int task_id) {
+            //check the input
+            //check if the list exists
+            if (!lists.contains(list_id)) {
+                return crow::response(NOTFOUND, "List not found.");
+            }
+            //check the request
+            auto task_json = crow::json::load(req.body);
+            //check if the json is valid
+            if (!task_json) {
+                return crow::response(BADREQUEST, "Invalid or missing JSON Body");
+            }
+            //check if the required fields are present
+            if (!validateTaskJson(task_json)) {
+                return crow::response(BADREQUEST, "Missing required fields: 'name' and/or 'done'.");
+            }
+
+            //check if the fields are of the correct type
+            bool is_done;
+            std::string task_name;
+            try {
+                is_done = task_json[DONE_FIELD].b();
+                task_name = task_json[NAME_FIELD].s();
+            } catch (const std::exception &e) {
+                return crow::response(
+                    BADREQUEST, "Invalid type for 'done': must be a boolean or 'name': must be a string.");
+            }
+
+
+            //check for the task
+            List &list = lists[list_id];
+            for (Task &task: list.tasks) {
+                if (task.id == task_id) {
+                    task.done = is_done;
+                    task.name = task_name;
+                    return crow::response(OK, "Task was successfully updated");
+                }
+            }
+
+            //task not found
+            return crow::response(NOTFOUND, "Task was not found");
+        }
+    );
 
     app.port(18080).run();
-
 }
