@@ -4,12 +4,12 @@ import ListScreen from "@/components/screens/ListScreen"
 import ArrowRight from "@/components/buttons/arrowRight";
 import ArrowLeft from "@/components/buttons/arrowLeft";
 import PlusIcon from "@/components/buttons/plusIcon";
+import Sample from "@/components/listIcons/sample";
 
 interface Task {
     id: string;
     name: string;
 }
-
 
 
 interface List {
@@ -19,7 +19,7 @@ interface List {
 
 
 export default function Index() {
-    const initList: List = { id: 0, title: "TaskDump"};
+    const initList: List = {id: 0, title: "TaskDump"};
     const [listCounter, setListCounter] = useState<number>(1);
     const [isSideBarVisible, setSideBarVisible] = useState<boolean>(false);
     const [listContainer, setListContainer] = useState<List[]>([initList]);
@@ -27,12 +27,27 @@ export default function Index() {
 
     // Add a new list to the listContainer and increment the listCounter
     const addList = () => {
-        const newList: List = { id: listCounter, title: "New List",  };
+        const newList: List = {id: listCounter, title: "New List",};
         setListCounter(prevState => prevState + 1);
         setListContainer((prevState) => [...prevState, newList]);
     }
 
-
+    const renderList = ({item}: { item: List }) => (
+        <TouchableOpacity onPress={() => setListDisplay(item)}>
+            {/*Add rendering for icons*/}
+            {isSideBarVisible
+                ?
+                <View style={styles.listItemContainer}>
+                    <Sample style={styles.icon}/>
+                    <Text style={styles.listItem}>{item.title}</Text>
+                </View>
+                :
+                <View style={styles.listItemContainer}>
+                    <Sample style={styles.icon}/>
+                </View>
+            }
+        </TouchableOpacity>
+    )
 
 
     return (
@@ -63,7 +78,7 @@ export default function Index() {
                         {/* PlusIcon only when the sidebar is visible */}
                         {isSideBarVisible && (
                             <TouchableOpacity onPress={addList}>
-                                <PlusIcon color="purple" height={40} width={40}/>
+                                <PlusIcon color="grey " height={40} width={40}/>
                             </TouchableOpacity>
                         )}
 
@@ -110,17 +125,16 @@ export default function Index() {
                             data={listContainer}
                             keyExtractor={(item) => item.id.toString()}
                             renderItem={({item}) => (
-                                <TouchableOpacity onPress={() => setListDisplay(item)}>
-                                    {/*Add rendering for icons*/}
-                                    <Text>{item.title}</Text>
-                                </TouchableOpacity>
+                                renderList({item})
                             )}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
                         />
                     </View>
 
                 </View>
                 <View style={{flex: 1}}>
-                    <ListScreen title={listDisplay.title} />
+                    <ListScreen title={listDisplay.title}/>
                 </View>
             </View>
         </View>
@@ -141,14 +155,32 @@ const styles = StyleSheet.create({
         borderColor: 'grey',
         marginLeft: 5,
         marginRight: 5,
-
+    },
+    listItem: {
+        fontSize: 20,
+        color: "black", // Add consistent text color
+        marginLeft: 10, // Add padding for spacing
+    },
+    listItemContainer: {
+        flexDirection: "row",
+        alignItems: "center", // Ensures consistent spacing
+        padding: 10, // Add padding for spacing
+        // Consistent bottom border
+        borderColor: "grey",
+    },
+    icon: {
+        color: 'black',
+        width: 30,
+        height: 30,
+        marginRight: 10, // Space between icon and text
     },
     menuButton: {
         color: 'black',
         width: 50,
         height: 50,
-    }
-})
+    },
+});
+
 
 
 
