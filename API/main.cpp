@@ -92,7 +92,7 @@ int main() {
         return crow::response(201, result);
     });
 
-    CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([](const int id){
+    CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([](const int id) {
         // Check if the list exists
         if (!lists.contains(id)) {
             return crow::response(404, "List not found.");
@@ -105,7 +105,8 @@ int main() {
         return crow::response(204, "Deleted list with id: " + std::to_string(id));
     });
 
-    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([](const crow::request& req, crow::response& res, int id){
+
+    CROW_ROUTE(app, "/lists/<int>").methods("PUT"_method)([](const crow::request &req, crow::response &res, int id) {
         // Check if the list exists
         if (!lists.contains(id)) {
             res.code = 404;
@@ -124,7 +125,7 @@ int main() {
         }
 
         // Update the list
-        List& list = lists[id];
+        List &list = lists[id];
         list.name = json["name"].s();
 
         // Return the updated list
@@ -157,6 +158,55 @@ int main() {
         out["list"] = std::move(result);
         return crow::response(200, out);
     });
+
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([](const crow::request &req, int id) {
+        auto json = crow::json::load(req.body);
+
+        //if there is no id to assign the tasks to they cant be posted
+        if (!json || !json.has("tasks")) {
+            return crow::response(400);
+        }
+
+        //check if the id exists
+
+        if (!lists.contains(id)) {
+            return crow::response(404, "List not found.");
+        }
+
+        //TODO fix the fore loop, its not compiling
+        std::vector<crow::json::rvalue> tasks = json["tasks"].lo();
+
+        //add all the tasks to the list
+        List &addTo = lists[id];
+
+        for (auto &task: tasks) {
+            Task v;
+            v.id = task["id"].i();
+            v.name = task["name"].s();
+            v.done = task["done"].b();
+
+            addTo.tasks.push_back(std::move(v));
+        }
+
+        //return the new results
+
+        crow::json::wvalue result;
+        result["id"] = addTo.id;
+        result["name"] = addTo.name;
+        crow::json::wvalue::list task_list;
+        for (Task &task: addTo.tasks) {
+            crow::json::wvalue task_json;
+            task_json["id"] = task.id;
+            task_json["name"] = task.name;
+            task_json["done"] = task.done;
+            task_list.push_back(std::move(task_json));
+        }
+        result["tasks"] = std::move(task_list);
+
+        return crow::response(201, result);
+    });
+
+
     app.port(18080).run();
 
 }
