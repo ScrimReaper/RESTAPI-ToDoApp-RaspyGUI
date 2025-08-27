@@ -1,5 +1,7 @@
 #include <iostream>
 #define WIN32_LEAN_AND_MEAN
+#include <math.h>
+
 #include "crow.h"
 #include "crow/json.h"
 #include <unordered_map>
@@ -17,9 +19,23 @@ struct List {
     std::vector<Task> tasks;
 };
 
+constexpr auto NAME_FIELD = "name";
+constexpr auto DONE_FIELD = "done";
+constexpr auto ID_FIELD = "id";
+constexpr auto TASKS_FIELD = "tasks";
+
 std::unordered_map<int, List> lists; //hashing by id
 int next_list_id = 0;
 int next_task_id = 0;
+int BADREQUEST = 400;
+int NOTFOUND = 404;
+int CREATED = 201;
+int NOCONTENT = 204;
+int OK = 200;
+
+bool validateTaskJson(const crow::json::rvalue &task) {
+    return task.has(NAME_FIELD) && task.has(DONE_FIELD) && task.has(ID_FIELD);
+}
 
 int main() {
     //creating a simple crow app
