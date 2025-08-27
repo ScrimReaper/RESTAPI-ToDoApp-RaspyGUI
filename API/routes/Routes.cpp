@@ -113,6 +113,27 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         returnVal[JsonF::list::TASKS] = JsonF::util::toJsonTasks(tasks);
         return crow::response(HttpStatus::OK, returnVal);
     });
+
+    //adds a task to a list
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("POST"_method)([&listManager](const crow::request &req, int listId) {
+        auto json = crow::json::load(req.body);
+
+        if (!JsonF::util::validateTaskJson(json)) {
+            return crow::response(HttpStatus::BADREQUEST, "Invalid or missing JSON Body");
+        }
+
+        std::string newTaskBody = json[JsonF::task::TASKBODY].s();
+        int newTaskId;
+        try {
+            newTaskId = listManager.postTask(newTaskBody, listId);
+        } catch (const std::invalid_argument &e) {
+            return crow::response(HttpStatus::BADREQUEST, e.what());
+        }
+
+        crow::json::wvalue returnVal;
+        returnVal[JsonF::task::ID] = newTaskId;
+        returnVal[JsonF::task::TASKBODY] = newTaskBody;
+
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 }
