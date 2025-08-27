@@ -65,7 +65,32 @@ int main() {
         return crow::response(200, out);
     });
 
+    CROW_ROUTE(app, "/lists").methods("POST"_method)([](const crow::request &req) {
+        auto json = crow::json::load(req.body);
+        if (!json || !json.has("name")) {
+            return crow::response(400);
+        }
 
+        std::string name = json["name"].s();
+        //check if the list is empty
+        if (name.empty()) {
+            return crow::response(400);
+        }
+
+        //create a new list
+        List list;
+        list.id = next_list_id++;
+        list.name = name;
+        list.tasks = {};
+        lists[list.id] = std::move(list);
+
+        //return created
+        crow::json::wvalue result;
+        result["id"] = list.id;
+        result["name"] = list.name;
+
+        return crow::response(201, result);
+    });
 
     CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([](const int id){
         // Check if the list exists
@@ -109,6 +134,7 @@ int main() {
         res.code = 200;
         res.body = result.dump();
         res.end();
+    });
 
     });
     app.port(18080).run();
