@@ -66,10 +66,17 @@ int main() {
     });
 
 
-    return 0;
-}
 
-// TIP See CLion help at <a
-// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
-//  Also, you can try interactive lessons for CLion by selecting
-//  'Help | Learn IDE Features' from the main menu.
+    CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([](const int id){
+        // Check if the list exists
+        if (!lists.contains(id)) {
+            return crow::response(404, "List not found.");
+        }
+
+        // Delete the list
+        lists.erase(id);
+
+        // Return no content response
+        return crow::response(204, "Deleted list with id: " + std::to_string(id));
+    });
+}
