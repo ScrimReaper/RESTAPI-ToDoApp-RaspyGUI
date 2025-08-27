@@ -136,6 +136,26 @@ int main() {
         res.end();
     });
 
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([](int id) {
+        //check if the list exists
+        if (!lists.contains(id)) {
+            return crow::response(404, "List not found.");
+        }
+        //else return the tasks
+
+        List &list = lists[id];
+        crow::json::wvalue::list result;
+        for (Task &task: list.tasks) {
+            crow::json::wvalue task_json;
+            task_json["id"] = task.id;
+            task_json["name"] = task.name;
+            task_json["done"] = task.done;
+            result.push_back(std::move(task_json));
+        }
+
+        crow::json::wvalue out;
+        out["list"] = std::move(result);
+        return crow::response(200, out);
     });
     app.port(18080).run();
 
