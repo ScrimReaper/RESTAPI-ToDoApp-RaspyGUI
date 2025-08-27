@@ -1,20 +1,70 @@
 #include <iostream>
+#define WIN32_LEAN_AND_MEAN
+#include "crow.h"
+#include "crow/json.h"
+#include <unordered_map>
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
+struct Task {
+    int id;
+    std::string name;
+    bool done;
+};
+
+struct List {
+    int id;
+    std::string name;
+    std::vector<Task> tasks;
+};
+
+std::unordered_map<int, List> lists; //hashing by id
+int next_list_id = 0;
+int next_task_id = 0;
+
 int main() {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the
-    // <b>lang</b> variable name to see how CLion can help you rename it.
-    auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
+    //creating a simple crow app
+    crow::SimpleApp app;
 
-    for (int i = 1; i <= 5; i++) {
-        // TIP Press <shortcut actionId="Debug"/> to start debugging your code.
-        // We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/>
-        // breakpoint for you, but you can always add more by pressing
-        // <shortcut actionId="ToggleLineBreakpoint"/>.
-        std::cout << "i = " << i << std::endl;
-    }
+
+    CROW_ROUTE(app, "/")([]() {
+        return "Hello World!";
+    });
+
+    CROW_ROUTE(app, "/lists").methods("GET"_method)([]() {
+        crow::json::wvalue::list result;
+
+        if (lists.empty()) {
+            return crow::response(204);
+        }
+
+        crow::json::wvalue list_json;
+        for (auto &temp: lists) {
+            List list = temp.second;
+            list_json["id"] = list.id;
+            list_json["name"] = list.name;
+
+
+            // Create a JSON list for tasks
+            crow::json::wvalue::list tasks_Json;
+            crow::json::wvalue task_json;
+            for (auto &task: list.tasks) {
+                task_json["id"] = task.id;
+                task_json["name"] = task.name;
+                task_json["done"] = task.done;
+                tasks_Json.push_back(std::move(task_json));
+                task_json.clear();
+            }
+            list_json["tasks"] = std::move(tasks_Json);
+            //add to result
+            result.push_back(std::move(list_json));
+            list_json.clear();
+        }
+
+        crow::json::wvalue out;
+        out["lists"] = std::move(result);
+        return crow::response(200, out);
+    });
+
 
     return 0;
 }
