@@ -136,4 +136,17 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::CREATED, returnVal);
     });
+
+    //this method deletes a distinct task from a list
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([&listManager](int listId, int taskId) {
+        bool successfull = listManager.deleteTask(listId, taskId);
+
+        if (!successfull) {
+            return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+        }
+
+        return crow::response(HttpStatus::NOCONTENT,
+                              "Deleted task with id: " + std::to_string(taskId) + " from list wit id: " +
+                              std::to_string(listId));
+    });
 }
