@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     View,
     Text,
@@ -9,83 +9,96 @@ import {
 import AddPopUp from "@/components/popUps/addPopUp";
 import DoneTick from "@/components/buttons/doneTick";
 import PlusIcon from "@/components/buttons/plusIcon";
+import {fetchTasks} from "@/functions/requests";
+import {List, Task} from "@/app/types";
 
-interface Task {
-    id: string;
-    name: string;
-}
 
 interface ListScreenProps {
-    title: string;
+    list: List;
 }
 
-const ListScreen: React.FC<ListScreenProps> = ({ title }: ListScreenProps) => {
-    const [tasks, setTasks] = useState<Task[]>([]); // Local state for tasks
-    const [taskIDCounter, setTaskIDCounter] = useState<number>(0);
+const ListScreen: React.FC<ListScreenProps> = ({list}: ListScreenProps) => {
     const [isAddModalVisible, setAddModalVisible] = useState<boolean>(false);
-    const inputRef = useRef<TextInput|null>(null);
+    const inputRef = useRef<TextInput | null>(null);
+    const [displayTasks, setDisplayTasks] = useState<Task[]>([]);
 
     // Add a new task
     const addTask = () => {
-        const newTask = { id: taskIDCounter.toString(), name: "" };
+        /*const newTask = {id: taskIDCounter.toString(), name: ""};
         setTasks((prevTasks) => [...prevTasks, newTask]);
         setTaskIDCounter((prevID) => prevID + 1);
 
         setTimeout(() => inputRef.current?.focus(), 100);
+
+         */
     };
 
-    //update task name
-    const updateTask = (taskId: string, taskName: string) => {
-        setTasks((prevstate) =>
-            prevstate.map((task) =>
-                task.id === taskId ? { ...task, name: taskName } : task)
-        );
-    };
+
+    const updateTasks = async () => {
+        const newTasks = await fetchTasks(list.listId);
+        let areEqual = newTasks.length == displayTasks.length &&
+            newTasks.every((value) => {
+                const existingTask = displayTasks.find(task => task.taskId === value.taskId);
+                return existingTask && existingTask.taskBody === value.taskBody;
+            });
+        if (!areEqual) {
+            setDisplayTasks(newTasks);
+        }
+    }
 
     // Delete a task
-    const deleteTask = (taskId: string) => {
-        setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    const deleteTask = (taskId: number) => {
+        /*setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+
+         */
     };
-    const handleEndEditing = (taskId: string, taskName: string) => {
+    const handleEndEditing = (taskId: number, taskName: string) => {
         if (taskName === "") {
             deleteTask(taskId);
         }
     }
 
+
     // Render each task
-    const renderItem = ({ item }: { item: Task }) => (
+    const renderItem = ({item}: { item: Task }) => (
         <View style={styles.taskItem}>
-            <TouchableOpacity onPress={() => deleteTask(item.id)}>
-                <DoneTick color="black" width={20} height={20} />
+            <TouchableOpacity onPress={() => deleteTask(item.taskId)}>
+                <DoneTick color="black" width={20} height={20}/>
             </TouchableOpacity>
 
             <TextInput
                 ref={inputRef}
                 style={styles.taskInput}
-                value={item.name}
-                onChangeText={(text) => updateTask(item.id, text)}
-                onEndEditing={() => handleEndEditing(item.id, item.name)}
-                onSubmitEditing={()=> handleEndEditing(item.id, item.name)}
+                value={item.taskBody}
                 multiline={false}
                 returnKeyType="done"
-                />
+            />
         </View>
     );
+
+    useEffect(() => {
+        updateTasks();
+        const updateInterval = setInterval(updateTasks, 5000);
+        return () => {
+            clearInterval(updateInterval);
+        };
+    }, [list])
+
 
     return (
         <View style={styles.container}>
             {/* Top Bar */}
             <View style={styles.topBar}>
-                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.title}>{list.listName}</Text>
             </View>
 
             {/* AddPopUp */}
-            <AddPopUp visible={isAddModalVisible} onClose={() => setAddModalVisible(false)} />
+            <AddPopUp visible={isAddModalVisible} onClose={() => setAddModalVisible(false)}/>
 
             {/* Task List */}
             <FlatList
-                data={tasks}
-                keyExtractor={(item) => item.id}
+                data={displayTasks}
+                keyExtractor={(item) => item.taskId.toString()}
                 renderItem={renderItem}
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
@@ -94,14 +107,16 @@ const ListScreen: React.FC<ListScreenProps> = ({ title }: ListScreenProps) => {
             {/* Bottom Bar */}
             <View style={styles.bttmBar}>
                 <TouchableOpacity onPress={addTask} style={styles.addButton}>
-                    <PlusIcon color="purple" />
+                    <PlusIcon color="purple"/>
                 </TouchableOpacity>
-                <Text style={{ marginLeft: 20, fontSize: 15, color: "purple" }}>
+                <Text style={{marginLeft: 20, fontSize: 15, color: "purple"}}>
                     Add Tasks
                 </Text>
             </View>
         </View>
     );
+
+
 };
 
 const styles = StyleSheet.create({
