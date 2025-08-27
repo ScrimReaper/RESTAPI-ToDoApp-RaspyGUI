@@ -41,6 +41,12 @@ int main() {
     //creating a simple crow app
     crow::SimpleApp app;
 
+    List taskdump;
+    taskdump.id = next_list_id++;
+    taskdump.name = "TaskDump";
+    taskdump.tasks = {};
+    lists[taskdump.id] = std::move(taskdump);
+
 
     CROW_ROUTE(app, "/")([]() {
         return "Hello World!";
