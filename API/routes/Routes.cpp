@@ -54,6 +54,18 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 
+    /**
+     * This Mehthod deletes a List from the Manager
+     */
+    CROW_ROUTE(app, "/lists/<int>").methods("DELETE"_method)([&listManager](const int id) {
+        const bool successfull = listManager.deleteList(id);
+
+        if (!successfull) {
+            return crow::response(HttpStatus::NOTFOUND, "Invalid ID");
+        }
+
+        return crow::response(HttpStatus::NOCONTENT, "Deleted list with id: " + std::to_string(id));
+    });
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 }
