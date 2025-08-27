@@ -244,7 +244,24 @@ int main() {
         return crow::response(CREATED, result);
     });
 
-        return crow::response(201, result);
+    CROW_ROUTE(app, "/lists/<int>/tasks/<int>").methods("DELETE"_method)([](int list_id, int task_id) {
+        //check if the list exists
+        if (!lists.contains(list_id)) {
+            return crow::response(NOTFOUND, "List not found.");
+        }
+
+        //check if the task exists
+        List &list = lists[list_id];
+        std::vector<Task> &tasks = list.tasks;
+        int c;
+        for (auto &task: tasks) {
+            if (task.id == task_id) {
+                tasks.erase(tasks.begin() + c);
+                return crow::response(NOCONTENT);
+            }
+            c++;
+        }
+        return crow::response(404, "Task not found.");
     });
 
 
