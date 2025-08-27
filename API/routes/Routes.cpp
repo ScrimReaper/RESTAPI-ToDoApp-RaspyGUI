@@ -91,6 +91,28 @@ void Routes::setUpRoutes(crow::SimpleApp &app, ListManager &listManager) {
 
         return crow::response(HttpStatus::OK, returnVal);
     });
+
+
+    //returns a list with its tasks
+    CROW_ROUTE(app, "/lists/<int>/tasks").methods("GET"_method)([&listManager](int listId) {
+        std::unordered_map<int, Task> tasks;
+        crow::json::wvalue returnVal;
+        returnVal[JsonF::list::ID] = listId;
+        returnVal[JsonF::list::TASKS];
+        try {
+            tasks = listManager.getTasks(listId);
+        } catch (const std::exception &e) {
+            return crow::response(HttpStatus::BADREQUEST, e.what());
+        }
+
+
+        if (tasks.empty()) {
+            return crow::response(HttpStatus::OK, returnVal);
+        }
+        returnVal[JsonF::list::ID] = listId;
+        returnVal[JsonF::list::TASKS] = JsonF::util::toJsonTasks(tasks);
+        return crow::response(HttpStatus::OK, returnVal);
+    });
         return crow::response(HttpStatus::CREATED, returnVal);
     });
 }
